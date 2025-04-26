@@ -1,16 +1,21 @@
 BasedOnStyle: Google
+ColumnLimit: 80
+
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
+
 IndentWidth: 2
-TabWidth: 2
-UseTab: Never
-ColumnLimit: 100
-AllowShortFunctionsOnASingleLine: Inline
-DerivePointerAlignment: false
-PointerAlignment: Left
-SortIncludes: true
-IncludeBlocks: Preserve
-BreakBeforeBraces: Attach
-AlwaysBreakAfterReturnType: None
-AllowShortIfStatementsOnASingleLine: true
-SpacesBeforeTrailingComments: 1
-ReflowComments: true
+ContinuationIndentWidth: 2
+
+AlignAfterOpenBracket: Align
+AlignOperands: true
+AlignEscapedNewlines: Left
+
+SpaceBeforeAssignmentOperators: true
 SpaceBeforeParens: ControlStatements
+SpaceInEmptyParentheses: false
+
+PointerAlignment: Left
