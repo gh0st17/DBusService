@@ -18,10 +18,7 @@ AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
   cout << format("Configuration path is {}\n", configPath.string());
 
   object = sdbus::createObject(cp.conn, sdbus::ObjectPath(cp.objectPath + appName));
-  signal = object->createSignal(
-    sdbus::InterfaceName(cp.interfaceName),
-    sdbus::SignalName(signalName)
-  );
+  signal = object->createSignal(cp.interfaceName, signalName);
 
   auto setConfigCallback = [this](const string& key, const sdbus::Variant& value) {
     this->setConfigCallback(key, value);
@@ -39,11 +36,11 @@ AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
   object->addVTable(
     sdbus::registerMethod(sdbus::MethodName("GetConfiguration"))
     .implementedAs(getConfigCallback)
-  ).forInterface(sdbus::InterfaceName(cp.interfaceName));
+  ).forInterface(cp.interfaceName);
 
   object->addVTable(
     sdbus::registerSignal(sdbus::SignalName(signalName))
-  ).forInterface(sdbus::InterfaceName(cp.interfaceName));
+  ).forInterface(cp.interfaceName);
 }
 
 void AppInstance::writeConfig(const string& configPath) const {

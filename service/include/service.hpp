@@ -17,10 +17,14 @@ private:
   vector< unique_ptr<AppInstance> > instances;
   unique_ptr<sdbus::IConnection> conn;
 
-  const string serviceName = "com.system.configurationManager";
-  const string interfaceName = serviceName + ".Application.Configuration";
-  const string signalName = "configurationChanged";
-  const string objectPath = "/com/system/configurationManager/";
+  const sdbus::ServiceName serviceName{"com.system.configurationManager"};
+  const sdbus::InterfaceName interfaceName{
+    sdbus::InterfaceName(
+      static_cast<string>(serviceName) + ".Application.Configuration"
+    )
+  };
+  const sdbus::SignalName signalName{"configurationChanged"};
+  const sdbus::ObjectPath objectPath{"/com/system/configurationManager/"};
 
   void initInstance(const fs::path& configPath);
 

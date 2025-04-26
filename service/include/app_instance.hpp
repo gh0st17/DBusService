@@ -12,8 +12,8 @@ using config = map<string, sdbus::Variant>;
 
 struct ConnParams {
   sdbus::IConnection& conn;
-  string interfaceName;
-  string objectPath;
+  sdbus::InterfaceName interfaceName;
+  sdbus::ObjectPath objectPath;
 };
 
 class AppInstance {
@@ -24,7 +24,7 @@ private:
   config dict;
   fs::path configPath;
 
-  const string signalName = "configurationChanged";
+  const sdbus::SignalName signalName{"configurationChanged"};
 
   map<string, sdbus::Variant> getConfigCallback() const;
   
