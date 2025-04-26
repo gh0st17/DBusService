@@ -21,7 +21,7 @@ void DBusService::initInstance(const fs::path& configPath) {
   ConnParams cp{
     .conn          = *(this->conn),
     .interfaceName = this->interfaceName,
-    .objectPath    = this->objectPath
+    .objectPath    = this->objectPath + "Application/"
   };
 
   auto instance = make_unique<AppInstance>(configPath, cp);
