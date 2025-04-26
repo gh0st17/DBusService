@@ -2,30 +2,30 @@
 #include <memory>
 #include <map>
 
+#include "app_instance.hpp"
+
 #include <sdbus-c++/sdbus-c++.h>
 #include <json/json.h>
 
 using namespace std;
 
+class AppInstance;
+using config = map<string, sdbus::Variant>;
+
 class DBusService {
 private:
-  unique_ptr<sdbus::IObject> object;
+  vector< unique_ptr<AppInstance> > instances;
   unique_ptr<sdbus::IConnection> conn;
-  map<string, map<string, sdbus::Variant> > dict;
-  vector<string> configsPaths;
 
   const string serviceName = "com.system.configurationManager";
   const string interfaceName = serviceName + ".Application.Configuration";
   const string signalName = "configurationChanged";
   const string objectPath = "/com/system/configurationManager/";
 
-  void initObject(const string& configPath);
-
-  void readConfig(const string& configPath);
-  void writeConfig(const string& configPath) const;
+  void initInstance(const fs::path& configPath);
 
 public:
-  DBusService(vector<string>&& configsPaths);
+  DBusService(vector<fs::path>&& configsPaths);
 
   void startService();
 };

@@ -33,11 +33,11 @@ void parse_params(const int argc, const char *argv[]) {
   }
 }
 
-vector<string> getJsonFiles(const char* directory) {
-  vector<string> jsonFiles;
+vector<fs::path> getJsonFiles(const char* directory) {
+  vector<fs::path> jsonFiles;
   for (const auto& entry : fs::directory_iterator(directory)) {
     if (entry.is_regular_file() && entry.path().extension() == ".json") {
-      jsonFiles.push_back(entry.path().string());
+      jsonFiles.push_back(entry.path());
     }
   }
   return jsonFiles;
