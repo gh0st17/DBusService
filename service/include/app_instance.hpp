@@ -4,7 +4,6 @@
 #include <map>
 
 #include <sdbus-c++/sdbus-c++.h>
-#include <json/json.h>
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -20,6 +19,8 @@ struct ConnParams {
 class AppInstance {
 private:
   unique_ptr<sdbus::IObject> object;
+  sdbus::Signal signal;
+  unique_ptr<ConnParams> cp;
   config dict;
   fs::path configPath;
 

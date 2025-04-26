@@ -19,9 +19,9 @@ DBusService::DBusService(vector<fs::path>&& configsPaths) {
 
 void DBusService::initInstance(const fs::path& configPath) {
   ConnParams cp{
-    conn:          *(this->conn),
-    objectPath:    this->objectPath,
-    interfaceName: this->interfaceName
+    .conn          = *(this->conn),
+    .interfaceName = this->interfaceName,
+    .objectPath    = this->objectPath
   };
 
   auto instance = make_unique<AppInstance>(configPath, cp);

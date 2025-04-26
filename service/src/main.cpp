@@ -23,6 +23,9 @@ int main(const int argc, const char *argv[]) {
   catch (const std::bad_alloc& e) {
     cerr << format("bad_alloc error: {}\n", e.what());
   }
+  catch(const Json::Exception& e){
+    cerr << format("json error: {}\n", e.what());
+  }
   catch (const sdbus::Error& e) {
     cerr << format("sdbus error: {}\n", e.what());
   }

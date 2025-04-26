@@ -4,9 +4,13 @@
 #include <functional>
 #include "app_instance.hpp"
 
+#include <json/json.h>
+
 namespace fs = std::filesystem;
 
 AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
+  this->configPath = configPath;
+  this->cp = make_unique<ConnParams>(cp);
   readConfig(configPath);
   const string appName = configPath.stem().string();
 
@@ -14,9 +18,13 @@ AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
   cout << format("Configuration path is {}\n", configPath.string());
 
   object = sdbus::createObject(cp.conn, sdbus::ObjectPath(cp.objectPath + appName));
+  signal = object->createSignal(
+    sdbus::InterfaceName(cp.interfaceName),
+    sdbus::SignalName(signalName)
+  );
 
   auto setConfigCallback = [this](const string& key, const sdbus::Variant& value) {
-    this->dict[key] = value;
+    this->setConfigCallback(key, value);
   };
 
   object->addVTable(
@@ -24,15 +32,18 @@ AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
     .implementedAs(setConfigCallback)
   ).forInterface(sdbus::InterfaceName(cp.interfaceName));
 
+  auto getConfigCallback = [this]() {
+    return this->getConfigCallback();
+  };
+
   object->addVTable(
     sdbus::registerMethod(sdbus::MethodName("GetConfiguration"))
-    .implementedAs([this]() { return getConfigCallback(); })
+    .implementedAs(getConfigCallback)
   ).forInterface(sdbus::InterfaceName(cp.interfaceName));
 
   object->addVTable(
-    sdbus::registerSignal(sdbus::SignalName(signalName)))
-    .forInterface(sdbus::InterfaceName(cp.interfaceName)
-  );
+    sdbus::registerSignal(sdbus::SignalName(signalName))
+  ).forInterface(sdbus::InterfaceName(cp.interfaceName));
 }
 
 void AppInstance::writeConfig(const string& configPath) const {
@@ -97,4 +108,33 @@ config AppInstance::getConfigCallback() const {
 
 void AppInstance::setConfigCallback(const string& key, const sdbus::Variant& value) {
   dict[key] = value;
+  try {
+    writeConfig(configPath);
+  }
+  catch (const fs::filesystem_error& e) {
+    cerr << format(
+      "filesystem error while writing conf: {}\n",
+      e.what()
+    );
+
+    return;
+  }
+  catch (const Json::Exception& e) {
+    cerr << format(
+      "json error while writing conf: {}\n",
+      e.what()
+    );
+
+    return;
+  }
+  catch (const std::exception& e) {
+    cerr << format(
+      "unknown error while writing conf: {}\n",
+      e.what()
+    );
+
+    return;
+  }
+
+  object->emitSignal(signal);
 }
