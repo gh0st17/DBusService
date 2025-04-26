@@ -18,7 +18,7 @@ void parse_params(const int argc, const char *argv[]) {
       if (++i < argc)
         p.configsPaths = getJsonFiles(argv[i]);
       else
-        throw invalid_argument("File path missing");
+        throw invalid_argument("Input directory missing");
     }
     else
       cout << format("Unknown argument '{}'\n", argv[i]);

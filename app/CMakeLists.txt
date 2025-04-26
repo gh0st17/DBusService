@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.0.1)
-project(DBusService)
+project(confManagerApplication)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -15,5 +15,5 @@ file(GLOB SRCS
   "src/*.cpp"
 )
 
-add_executable(DBusService ${SRCS})
-target_link_libraries(DBusService PRIVATE sdbus-c++ ${JSONCPP_LIBRARIES})
+add_executable(confManagerApplication ${SRCS})
+target_link_libraries(confManagerApplication PRIVATE sdbus-c++ ${JSONCPP_LIBRARIES})

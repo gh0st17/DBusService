@@ -43,10 +43,10 @@ AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
   ).forInterface(cp.interfaceName);
 }
 
-void AppInstance::writeConfig(const string& configPath) const {
+void AppInstance::writeConfig(const fs::path& configPath) const {
   ofstream ofs(configPath);
   if (!ofs.is_open()) {
-    throw std::runtime_error("Can't write file " + configPath);
+    throw std::runtime_error("Can't write file " + configPath.string());
   }
 
   Json::Value root;
@@ -69,10 +69,10 @@ void AppInstance::writeConfig(const string& configPath) const {
   ofs.close();
 }
 
-void AppInstance::readConfig(const string& configPath){
+void AppInstance::readConfig(const fs::path& configPath){
   ifstream ifs(configPath);
   if (!ifs.is_open()) {
-    throw std::runtime_error("Can't open file: " + configPath);
+    throw std::runtime_error("Can't open file: " + configPath.string());
   }
 
   Json::Value root;
