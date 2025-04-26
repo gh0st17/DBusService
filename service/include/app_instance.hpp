@@ -33,8 +33,8 @@ private:
     const sdbus::Variant& value
   );
 
-  void readConfig(const fs::path& configPath);
-  void writeConfig(const fs::path& configPath) const;
+  void readConfig();
+  void writeConfig() const;
 
 public:
   AppInstance(const fs::path& configPath, const ConnParams& cp);

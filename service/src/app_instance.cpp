@@ -10,8 +10,9 @@ namespace fs = std::filesystem;
 
 AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
   this->configPath = configPath;
+  readConfig();
+  
   this->cp = make_unique<ConnParams>(cp);
-  readConfig(configPath);
   const string appName = configPath.stem().string();
 
   cout << format("Creating configuration listener instance for {}\n", appName);
@@ -43,7 +44,7 @@ AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
   ).forInterface(cp.interfaceName);
 }
 
-void AppInstance::writeConfig(const fs::path& configPath) const {
+void AppInstance::writeConfig() const {
   ofstream ofs(configPath);
   if (!ofs.is_open()) {
     throw std::runtime_error("Can't write file " + configPath.string());
@@ -54,10 +55,10 @@ void AppInstance::writeConfig(const fs::path& configPath) const {
   for (const auto& [key, value] : dict) {
     if (value.containsValueOfType<string>()) {
       root[key] = value.get<string>();
-    } else if (value.containsValueOfType<uint32_t>()) {
-      root[key] = value.get<uint32_t>();
-    } else if (value.containsValueOfType<int32_t>()) {
-      root[key] = value.get<int32_t>();
+    } else if (value.containsValueOfType<uint>()) {
+      root[key] = value.get<uint>();
+    } else if (value.containsValueOfType<int>()) {
+      root[key] = value.get<int>();
     } else if (value.containsValueOfType<bool>()) {
       root[key] = value.get<bool>();
     } else {
@@ -69,7 +70,7 @@ void AppInstance::writeConfig(const fs::path& configPath) const {
   ofs.close();
 }
 
-void AppInstance::readConfig(const fs::path& configPath){
+void AppInstance::readConfig(){
   ifstream ifs(configPath);
   if (!ifs.is_open()) {
     throw std::runtime_error("Can't open file: " + configPath.string());
@@ -81,18 +82,18 @@ void AppInstance::readConfig(const fs::path& configPath){
   for (const auto& key : root.getMemberNames()) {
     const Json::Value& val = root[key];
 
-    std::cout << key << ": " << val << std::endl;
+    cout << format("{}: {}\n", key, val.asString());
 
     if (val.isUInt()) {
-      dict[key] = sdbus::Variant(static_cast<uint32_t>(val.asUInt()));
+      dict[key] = sdbus::Variant(static_cast<uint>(val.asUInt()));
     } else if (val.isInt()) {
-      dict[key] = sdbus::Variant(static_cast<int32_t>(val.asInt()));
+      dict[key] = sdbus::Variant(static_cast<int>(val.asInt()));
     } else if (val.isString()) {
       dict[key] = sdbus::Variant(val.asString());
     } else if (val.isBool()) {
       dict[key] = sdbus::Variant(val.asBool());
     } else {
-      std::cerr << "Unknown type: " << key << std::endl;
+      cerr << "Unknown type: " << key << std::endl;
     }
   }
 
@@ -106,7 +107,7 @@ config AppInstance::getConfigCallback() const {
 void AppInstance::setConfigCallback(const string& key, const sdbus::Variant& value) {
   dict[key] = value;
   try {
-    writeConfig(configPath);
+    writeConfig();
   }
   catch (const fs::filesystem_error& e) {
     cerr << format(
