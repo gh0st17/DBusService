@@ -21,6 +21,7 @@ void DBusService::initInstance(const fs::path& configPath) {
   ConnParams cp{
     .conn          = *(this->conn),
     .interfaceName = this->interfaceName,
+    .signalName    = this->signalName,
     .objectPath    = sdbus::ObjectPath(this->objectPath + "Application/")
   };
 

@@ -13,13 +13,13 @@ using config = map<string, sdbus::Variant>;
 struct ConnParams {
   sdbus::IConnection& conn;
   sdbus::InterfaceName interfaceName;
+  sdbus::SignalName signalName;
   sdbus::ObjectPath objectPath;
 };
 
 class AppInstance {
 private:
   unique_ptr<sdbus::IObject> object;
-  sdbus::Signal signal;
   unique_ptr<ConnParams> cp;
   config dict;
   fs::path configPath;

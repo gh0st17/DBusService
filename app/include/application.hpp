@@ -33,6 +33,7 @@ private:
   const sdbus::SignalName signalName{"configurationChanged"};
 
   void readConfig();
+  sdbus::signal_handler signalCallback();
 
 public:
   ConfManagerApplication(const fs::path& configPath);

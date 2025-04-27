@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.0.1)
+cmake_minimum_required(VERSION 3.28)
 project(DBusService)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -10,7 +10,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP jsoncpp)
 link_libraries(${JSONCPP_LIBRARIES})
 
-include_directories(include)
+include_directories(include ${JSONCPP_INCLUDE_DIRS})
 file(GLOB SRCS
   "src/*.cpp"
 )

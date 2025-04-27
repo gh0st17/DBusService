@@ -19,7 +19,6 @@ AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
   cout << format("Configuration path is {}\n", configPath.string());
 
   object = sdbus::createObject(cp.conn, sdbus::ObjectPath(cp.objectPath + appName));
-  signal = object->createSignal(cp.interfaceName, signalName);
 
   auto setConfigCallback = [this](const string& key, const sdbus::Variant& value) {
     this->setConfigCallback(key, value);
@@ -134,5 +133,13 @@ void AppInstance::setConfigCallback(const string& key, const sdbus::Variant& val
     return;
   }
 
-  object->emitSignal(signal);
+  try {
+    auto signal = object->createSignal(this->cp->interfaceName, this->cp->signalName);
+    signal << key << dict[key];
+    object->emitSignal(signal);
+  } catch (const sdbus::Error& e) {
+    cerr << format("sdbus error while signaling: {}\n", e.what());
+  } catch (const std::exception& e) {
+    cerr << format("unknown error while signaling: {}\n", e.what());
+  }
 }

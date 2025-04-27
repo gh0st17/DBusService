@@ -12,9 +12,29 @@ ConfManagerApplication::ConfManagerApplication(const fs::path& configPath) {
   conn = sdbus::createSessionBusConnection();
 
   proxy = sdbus::createProxy(*conn, serviceName, sdbus::ObjectPath(objectPath + appName));
-  proxy->uponSignal(signalName)
-    .onInterface(interfaceName)
-    .call([this]() { this->readConfig(); });
+  proxy->registerSignalHandler(interfaceName, signalName, signalCallback());
+}
+
+sdbus::signal_handler ConfManagerApplication::signalCallback() {
+  sdbus::signal_handler sh = [this](sdbus::Signal signal) {
+    string key;
+    sdbus::Variant value;
+    signal >> key >> value;
+
+    if (value.containsValueOfType<string>()) {
+      dict[key] = value.get<string>();
+    } else if (value.containsValueOfType<uint>()) {
+      dict[key] = value.get<uint>();
+    } else if (value.containsValueOfType<int>()) {
+      dict[key] = value.get<int>();
+    } else if (value.containsValueOfType<bool>()) {
+      dict[key] = value.get<bool>();
+    } else {
+      cerr << format("Unknown type of key '{}'\n", key);
+    }
+  };
+
+  return sh;
 }
 
 void ConfManagerApplication::readConfig(){
