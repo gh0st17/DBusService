@@ -19,8 +19,7 @@
 2. Выполните от имени супер-пользователя следующую команду для установки пакетов:
 
 ```
-apt install -y cmake build-essential libjsoncpp-dev libjsoncpp25 python3-pkgconfig
- libsystemd-dev
+apt install -y cmake build-essential libjsoncpp-dev libjsoncpp25 python3-pkgconfig libsystemd-dev
 ```
 3. Можно перейти к следующему разделу.
 

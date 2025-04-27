@@ -1,47 +1,46 @@
-#include <iostream>
-#include <fstream>
-#include <filesystem>
-#include <functional>
-
 #include "app_instance.hpp"
 
 #include <json/json.h>
+
+#include <filesystem>
+#include <fstream>
+#include <functional>
+#include <iostream>
 
 namespace fs = std::filesystem;
 
 AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
   this->configPath = configPath;
   readConfig();
-  
+
   this->cp = make_unique<ConnParams>(cp);
   const string appName = configPath.stem().string();
 
   cout << "Creating configuration listener instance for " << appName << endl;
   cout << "Configuration path is '" << configPath.string() << "'" << endl;
 
-  object = sdbus::createObject(cp.conn, sdbus::ObjectPath(cp.objectPath + appName));
+  object =
+    sdbus::createObject(cp.conn, sdbus::ObjectPath(cp.objectPath + appName));
 
-  auto setConfigCallback = [this](const string& key, const sdbus::Variant& value) {
+  auto setConfigCallback = [this](const string& key,
+                                  const sdbus::Variant& value) {
     this->setConfigCallback(key, value);
   };
 
-  object->addVTable(
-    sdbus::registerMethod(sdbus::MethodName("ChangeConfiguration"))
-    .implementedAs(setConfigCallback)
-  ).forInterface(sdbus::InterfaceName(cp.interfaceName));
+  object
+    ->addVTable(sdbus::registerMethod(sdbus::MethodName("ChangeConfiguration"))
+                  .implementedAs(setConfigCallback))
+    .forInterface(sdbus::InterfaceName(cp.interfaceName));
 
-  auto getConfigCallback = [this]() {
-    return this->getConfigCallback();
-  };
+  auto getConfigCallback = [this]() { return this->getConfigCallback(); };
 
-  object->addVTable(
-    sdbus::registerMethod(sdbus::MethodName("GetConfiguration"))
-    .implementedAs(getConfigCallback)
-  ).forInterface(cp.interfaceName);
+  object
+    ->addVTable(sdbus::registerMethod(sdbus::MethodName("GetConfiguration"))
+                  .implementedAs(getConfigCallback))
+    .forInterface(cp.interfaceName);
 
-  object->addVTable(
-    sdbus::registerSignal(sdbus::SignalName(signalName))
-  ).forInterface(cp.interfaceName);
+  object->addVTable(sdbus::registerSignal(sdbus::SignalName(signalName)))
+    .forInterface(cp.interfaceName);
 }
 
 void AppInstance::writeConfig() const {
@@ -70,7 +69,7 @@ void AppInstance::writeConfig() const {
   ofs.close();
 }
 
-void AppInstance::readConfig(){
+void AppInstance::readConfig() {
   ifstream ifs(configPath);
   if (!ifs.is_open()) {
     throw std::runtime_error("Can't open file: " + configPath.string());
@@ -97,33 +96,32 @@ void AppInstance::readConfig(){
     }
   }
 
-  ifs.close();  
+  ifs.close();
 }
 
 config AppInstance::getConfigCallback() const {
   return dict;
 }
 
-void AppInstance::setConfigCallback(const string& key, const sdbus::Variant& value) {
+void AppInstance::setConfigCallback(const string& key,
+                                    const sdbus::Variant& value) {
   dict[key] = value;
   try {
     writeConfig();
-  }
-  catch (const fs::filesystem_error& e) {
+  } catch (const fs::filesystem_error& e) {
     cerr << "filesystem error while writing conf: " << e.what() << endl;
     return;
-  }
-  catch (const Json::Exception& e) {
+  } catch (const Json::Exception& e) {
     cerr << "json error while writing conf: " << e.what() << endl;
     return;
-  }
-  catch (const std::exception& e) {
+  } catch (const std::exception& e) {
     cerr << "unknown error while writing conf: " << e.what() << endl;
     return;
   }
 
   try {
-    auto signal = object->createSignal(this->cp->interfaceName, this->cp->signalName);
+    auto signal =
+      object->createSignal(this->cp->interfaceName, this->cp->signalName);
     signal << key << dict[key];
     object->emitSignal(signal);
   } catch (const sdbus::Error& e) {

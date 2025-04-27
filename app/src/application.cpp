@@ -1,7 +1,7 @@
-#include <iostream>
-#include <fstream>
-
 #include "application.hpp"
+
+#include <fstream>
+#include <iostream>
 
 ConfManagerApplication::ConfManagerApplication(const fs::path& configPath) {
   this->configPath = configPath;
@@ -10,7 +10,8 @@ ConfManagerApplication::ConfManagerApplication(const fs::path& configPath) {
 
   conn = sdbus::createSessionBusConnection();
 
-  proxy = sdbus::createProxy(*conn, serviceName, sdbus::ObjectPath(objectPath + appName));
+  proxy = sdbus::createProxy(*conn, serviceName,
+                             sdbus::ObjectPath(objectPath + appName));
   proxy->registerSignalHandler(interfaceName, signalName, signalCallback());
 }
 
@@ -36,7 +37,7 @@ sdbus::signal_handler ConfManagerApplication::signalCallback() {
   return sh;
 }
 
-void ConfManagerApplication::readConfig(){
+void ConfManagerApplication::readConfig() {
   ifstream ifs(configPath);
   if (!ifs.is_open()) {
     throw std::runtime_error("Can't open file: " + configPath.string());
@@ -64,7 +65,7 @@ void ConfManagerApplication::readConfig(){
     }
   }
 
-  ifs.close();  
+  ifs.close();
 }
 
 void ConfManagerApplication::start() {
@@ -76,25 +77,21 @@ void ConfManagerApplication::printTimeoutPhrase() {
 
   if (dict.find("TimeoutPhrase") == dict.end()) {
     cout << appName() << ": TimeoutPhrase: <Key unset>\n";
-  }
-  else if (dict["TimeoutPhrase"].type() == typeid(string)) {
+  } else if (dict["TimeoutPhrase"].type() == typeid(string)) {
     string value = any_cast<string>(dict["TimeoutPhrase"]);
-    cout << appName() << ": TimeoutPhrase: '" << value << "'" << endl;    
+    cout << appName() << ": TimeoutPhrase: '" << value << "'" << endl;
   }
 }
-
 
 const optional<uint> ConfManagerApplication::timeout() {
   const lock_guard<mutex> lock(mu);
 
   if (dict.find("Timeout") == dict.end()) {
     cout << "<Timeout unset>\n";
-  }
-  else if (dict["Timeout"].type() == typeid(uint)) {
+  } else if (dict["Timeout"].type() == typeid(uint)) {
     uint value = any_cast<uint>(dict["Timeout"]);
     return value;
-  }
-  else {
+  } else {
     cout << appName() << ": Timeout is not uint type\n";
   }
 

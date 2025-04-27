@@ -1,7 +1,7 @@
 #pragma once
 #include <filesystem>
-#include <memory>
 #include <map>
+#include <memory>
 
 #include "sdbus-c++/sdbus-c++.h"
 
@@ -18,7 +18,7 @@ struct ConnParams {
 };
 
 class AppInstance {
-private:
+ private:
   unique_ptr<sdbus::IObject> object;
   unique_ptr<ConnParams> cp;
   config dict;
@@ -27,15 +27,12 @@ private:
   const sdbus::SignalName signalName{"configurationChanged"};
 
   map<string, sdbus::Variant> getConfigCallback() const;
-  
-  void setConfigCallback(
-    const string& key,
-    const sdbus::Variant& value
-  );
+
+  void setConfigCallback(const string& key, const sdbus::Variant& value);
 
   void readConfig();
   void writeConfig() const;
 
-public:
+ public:
   AppInstance(const fs::path& configPath, const ConnParams& cp);
 };

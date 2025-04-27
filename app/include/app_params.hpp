@@ -11,5 +11,5 @@ struct AppParams {
 
 extern struct AppParams p;
 
-void parse_params(const int argc, const char *argv[]);
+void parse_params(const int argc, const char* argv[]);
 vector<fs::path> getJsonFiles(const char* directory);

@@ -1,13 +1,14 @@
 #pragma once
+#include <json/json.h>
+
 #include <any>
-#include <map>
-#include <mutex>
-#include <memory>
-#include <optional>
 #include <filesystem>
+#include <map>
+#include <memory>
+#include <mutex>
+#include <optional>
 
 #include "sdbus-c++/sdbus-c++.h"
-#include <json/json.h>
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -15,7 +16,7 @@ namespace fs = std::filesystem;
 using config = map<string, any>;
 
 class ConfManagerApplication {
-private:
+ private:
   unique_ptr<sdbus::IConnection> conn;
   unique_ptr<sdbus::IProxy> proxy;
   fs::path configPath;
@@ -24,29 +25,28 @@ private:
   mutex mu;
 
   const sdbus::ServiceName serviceName{"com.system.configurationManager"};
-  const sdbus::InterfaceName interfaceName{
-    sdbus::InterfaceName(
-      static_cast<string>(serviceName) + ".Application.Configuration"
-    )
-  };
-  const sdbus::ObjectPath objectPath{"/com/system/configurationManager/Application/"};
+  const sdbus::InterfaceName interfaceName{sdbus::InterfaceName(
+    static_cast<string>(serviceName) + ".Application.Configuration")};
+  const sdbus::ObjectPath objectPath{
+    "/com/system/configurationManager/Application/"};
   const sdbus::SignalName signalName{"configurationChanged"};
 
   void readConfig();
   sdbus::signal_handler signalCallback();
 
-public:
+ public:
   ConfManagerApplication(const fs::path& configPath);
   ConfManagerApplication(const ConfManagerApplication&) = delete;
   ConfManagerApplication(ConfManagerApplication&& other) noexcept
-    : conn(std::move(other.conn)),
-      proxy(std::move(other.proxy)),
-      configPath(std::move(other.configPath)),
-      dict(std::move(other.dict)),
-      serviceName(other.serviceName),
-      interfaceName(other.interfaceName),
-      objectPath(other.objectPath),
-      signalName(other.signalName) {}
+      : conn(std::move(other.conn)),
+        proxy(std::move(other.proxy)),
+        configPath(std::move(other.configPath)),
+        dict(std::move(other.dict)),
+        serviceName(other.serviceName),
+        interfaceName(other.interfaceName),
+        objectPath(other.objectPath),
+        signalName(other.signalName) {
+  }
 
   ConfManagerApplication& operator=(const ConfManagerApplication&) = delete;
 

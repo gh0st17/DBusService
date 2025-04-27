@@ -1,7 +1,7 @@
 #include <iostream>
-#include <thread>
 #include <list>
 #include <memory>
+#include <thread>
 
 #include "app_params.hpp"
 #include "application.hpp"
@@ -10,28 +10,22 @@ using namespace std;
 
 void handleApplications(const vector<fs::path>&);
 
-int main(const int argc, const char *argv[]) {
+int main(const int argc, const char* argv[]) {
   try {
     parse_params(argc, argv);
 
     handleApplications(p.configsPaths);
-  }
-  catch (const fs::filesystem_error& e) {
+  } catch (const fs::filesystem_error& e) {
     cerr << "filesystem error: " << e.what() << endl;
-  }
-  catch (const std::bad_cast& e) {
+  } catch (const std::bad_cast& e) {
     cerr << "bad_cast error: " << e.what() << endl;
-  }
-  catch (const std::bad_alloc& e) {
+  } catch (const std::bad_alloc& e) {
     cerr << "bad_alloc error: " << e.what() << endl;
-  }
-  catch(const Json::Exception& e){
+  } catch (const Json::Exception& e) {
     cerr << "json error: " << e.what() << endl;
-  }
-  catch (const sdbus::Error& e) {
+  } catch (const sdbus::Error& e) {
     cerr << "sdbus error: " << e.what() << endl;
-  }
-  catch (const std::exception& e) {
+  } catch (const std::exception& e) {
     cerr << "unknown error: " << e.what() << endl;
   }
 }
@@ -47,7 +41,7 @@ void handleApplications(const vector<fs::path>& configsPaths) {
     apps.push_back(std::move(app));
     apps.back()->start();
 
-    threads.push_back(thread([cma = apps.back().get(), &mu] () mutable {
+    threads.push_back(thread([cma = apps.back().get(), &mu]() mutable {
       uint timeout = 10;
       while (true) {
         auto timeoutOpt = cma->timeout();

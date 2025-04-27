@@ -1,7 +1,8 @@
-#include <iostream>
-#include <fstream>
-#include <filesystem>
 #include "service.hpp"
+
+#include <filesystem>
+#include <fstream>
+#include <iostream>
 
 namespace fs = std::filesystem;
 
@@ -19,11 +20,10 @@ DBusService::DBusService(vector<fs::path>&& configsPaths) {
 
 void DBusService::initInstance(const fs::path& configPath) {
   ConnParams cp{
-    .conn          = *(this->conn),
+    .conn = *(this->conn),
     .interfaceName = this->interfaceName,
-    .signalName    = this->signalName,
-    .objectPath    = sdbus::ObjectPath(this->objectPath + "Application/")
-  };
+    .signalName = this->signalName,
+    .objectPath = sdbus::ObjectPath(this->objectPath + "Application/")};
 
   auto instance = make_unique<AppInstance>(configPath, cp);
 
