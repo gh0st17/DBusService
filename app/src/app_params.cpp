@@ -1,5 +1,4 @@
 #include <iostream>
-#include <format>
 #include <string.h>
 
 using namespace std;
@@ -21,14 +20,12 @@ void parse_params(const int argc, const char *argv[]) {
         throw invalid_argument("Input directory missing");
     }
     else
-      cout << format("Unknown argument '{}'\n", argv[i]);
+      cout << "Unknown argument '" << argv[i] << "'" << endl;
   }
 
   if (p.configsPaths.size() == 0) {
     throw invalid_argument(
-      format(
         "Input directory doesn't contains any json file\n"
-      )
     );
   }
 }

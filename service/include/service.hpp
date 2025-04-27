@@ -4,7 +4,7 @@
 
 #include "app_instance.hpp"
 
-#include <sdbus-c++/sdbus-c++.h>
+#include "sdbus-c++/sdbus-c++.h"
 #include <json/json.h>
 
 using namespace std;

@@ -1,6 +1,5 @@
 #include <iostream>
 #include <thread>
-#include <format>
 #include <list>
 #include <memory>
 
@@ -18,22 +17,22 @@ int main(const int argc, const char *argv[]) {
     handleApplications(p.configsPaths);
   }
   catch (const fs::filesystem_error& e) {
-    cerr << format("filesystem error: {}\n", e.what());
+    cerr << "filesystem error: " << e.what() << endl;
   }
   catch (const std::bad_cast& e) {
-    cerr << format("bad_cast error: {}\n", e.what());
+    cerr << "bad_cast error: " << e.what() << endl;
   }
   catch (const std::bad_alloc& e) {
-    cerr << format("bad_alloc error: {}\n", e.what());
+    cerr << "bad_alloc error: " << e.what() << endl;
   }
   catch(const Json::Exception& e){
-    cerr << format("json error: {}\n", e.what());
+    cerr << "json error: " << e.what() << endl;
   }
   catch (const sdbus::Error& e) {
-    cerr << format("sdbus error: {}\n", e.what());
+    cerr << "sdbus error: " << e.what() << endl;
   }
   catch (const std::exception& e) {
-    cerr << format("unknown error: {}\n", e.what());
+    cerr << "unknown error: " << e.what() << endl;
   }
 }
 

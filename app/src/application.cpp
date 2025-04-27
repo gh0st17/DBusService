@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <format>
 
 #include "application.hpp"
 
@@ -30,7 +29,7 @@ sdbus::signal_handler ConfManagerApplication::signalCallback() {
     } else if (value.containsValueOfType<bool>()) {
       dict[key] = value.get<bool>();
     } else {
-      cerr << format("Unknown type of key '{}'\n", key);
+      cerr << "Unknown type of key '" << key << "'" << endl;
     }
   };
 
@@ -50,7 +49,7 @@ void ConfManagerApplication::readConfig(){
   for (const auto& key : root.getMemberNames()) {
     const Json::Value& val = root[key];
 
-    cout << format("{}: {}\n", key, val.asString());
+    cout << key << ": " << val.asString() << endl;
 
     if (val.isUInt()) {
       dict[key] = static_cast<uint>(val.asUInt());
@@ -80,7 +79,7 @@ void ConfManagerApplication::printTimeoutPhrase() {
   }
   else if (dict["TimeoutPhrase"].type() == typeid(string)) {
     string value = any_cast<string>(dict["TimeoutPhrase"]);
-    cout << format("TimeoutPhrase: {}\n", value);
+    cout << "TimeoutPhrase: '" << value << "'" << endl;    
   }
 }
 

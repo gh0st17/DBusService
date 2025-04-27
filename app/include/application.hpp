@@ -6,7 +6,7 @@
 #include <optional>
 #include <filesystem>
 
-#include <sdbus-c++/sdbus-c++.h>
+#include "sdbus-c++/sdbus-c++.h"
 #include <json/json.h>
 
 using namespace std;

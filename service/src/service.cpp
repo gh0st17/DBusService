@@ -11,7 +11,7 @@ DBusService::DBusService(vector<fs::path>&& configsPaths) {
   conn->requestName(sdbus::ServiceName(serviceName));
 
   for (const auto& path : configsPaths) {
-    cout << format("Read config '{}'\n", path.string());
+    cout << "Read config '" << path.string() << "'" << endl;
 
     initInstance(path);
   }

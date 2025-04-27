@@ -2,6 +2,7 @@
 #include <fstream>
 #include <filesystem>
 #include <functional>
+
 #include "app_instance.hpp"
 
 #include <json/json.h>
@@ -15,8 +16,8 @@ AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
   this->cp = make_unique<ConnParams>(cp);
   const string appName = configPath.stem().string();
 
-  cout << format("Creating configuration listener instance for {}\n", appName);
-  cout << format("Configuration path is {}\n", configPath.string());
+  cout << "Creating configuration listener instance for " << appName << endl;
+  cout << "Configuration path is '" << configPath.string() << "'" << endl;
 
   object = sdbus::createObject(cp.conn, sdbus::ObjectPath(cp.objectPath + appName));
 
@@ -81,7 +82,7 @@ void AppInstance::readConfig(){
   for (const auto& key : root.getMemberNames()) {
     const Json::Value& val = root[key];
 
-    cout << format("{}: {}\n", key, val.asString());
+    cout << key << ": " << val.asString() << endl;
 
     if (val.isUInt()) {
       dict[key] = sdbus::Variant(static_cast<uint>(val.asUInt()));
@@ -109,27 +110,15 @@ void AppInstance::setConfigCallback(const string& key, const sdbus::Variant& val
     writeConfig();
   }
   catch (const fs::filesystem_error& e) {
-    cerr << format(
-      "filesystem error while writing conf: {}\n",
-      e.what()
-    );
-
+    cerr << "filesystem error while writing conf: " << e.what() << endl;
     return;
   }
   catch (const Json::Exception& e) {
-    cerr << format(
-      "json error while writing conf: {}\n",
-      e.what()
-    );
-
+    cerr << "json error while writing conf: " << e.what() << endl;
     return;
   }
   catch (const std::exception& e) {
-    cerr << format(
-      "unknown error while writing conf: {}\n",
-      e.what()
-    );
-
+    cerr << "unknown error while writing conf: " << e.what() << endl;
     return;
   }
 
@@ -138,8 +127,8 @@ void AppInstance::setConfigCallback(const string& key, const sdbus::Variant& val
     signal << key << dict[key];
     object->emitSignal(signal);
   } catch (const sdbus::Error& e) {
-    cerr << format("sdbus error while signaling: {}\n", e.what());
+    cerr << "sdbus error while signaling: " << e.what() << endl;
   } catch (const std::exception& e) {
-    cerr << format("unknown error while signaling: {}\n", e.what());
+    cerr << "unknown error while signaling: " << e.what() << endl;
   }
 }
