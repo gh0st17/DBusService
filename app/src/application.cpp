@@ -21,6 +21,8 @@ sdbus::signal_handler ConfManagerApplication::signalCallback() {
     sdbus::Variant value;
     signal >> key >> value;
 
+    cout << appName() << ": Recieved key: " << key << endl;
+
     if (value.containsValueOfType<string>()) {
       dict[key] = value.get<string>();
     } else if (value.containsValueOfType<uint>()) {
