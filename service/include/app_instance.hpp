@@ -1,7 +1,8 @@
 #pragma once
-#include <filesystem>
 #include <map>
+#include <mutex>
 #include <memory>
+#include <filesystem>
 
 #include "sdbus-c++/sdbus-c++.h"
 
@@ -21,8 +22,9 @@ class AppInstance {
  private:
   unique_ptr<sdbus::IObject> object;
   unique_ptr<ConnParams> cp;
-  config dict;
   fs::path configPath;
+  config dict;
+  mutex mu;
 
   const sdbus::SignalName signalName{"configurationChanged"};
 
@@ -31,7 +33,7 @@ class AppInstance {
   void setConfigCallback(const string& key, const sdbus::Variant& value);
 
   void readConfig();
-  void writeConfig() const;
+  void writeConfig();
 
  public:
   AppInstance(const fs::path& configPath, const ConnParams& cp);

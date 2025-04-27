@@ -43,7 +43,8 @@ AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
     .forInterface(cp.interfaceName);
 }
 
-void AppInstance::writeConfig() const {
+void AppInstance::writeConfig() {
+  const lock_guard<mutex> lock(mu);
   ofstream ofs(configPath);
   if (!ofs.is_open()) {
     throw std::runtime_error("Can't write file " + configPath.string());
@@ -70,6 +71,7 @@ void AppInstance::writeConfig() const {
 }
 
 void AppInstance::readConfig() {
+  const lock_guard<mutex> lock(mu);
   ifstream ifs(configPath);
   if (!ifs.is_open()) {
     throw std::runtime_error("Can't open file: " + configPath.string());
