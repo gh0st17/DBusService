@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "params.hpp"
+#include "generic/params.hpp"
 #include "service.hpp"
 
 using namespace std;
@@ -9,9 +9,8 @@ int main(const int argc, const char* argv[]) {
   try {
     parse_params(argc, argv);
 
-    DBusService service(std::move(p.configsPaths));
-
-    service.startService();
+    DBusService(std::move(p.configsPaths)).startService();
+    
   } catch (const fs::filesystem_error& e) {
     cerr << "filesystem error: " << e.what() << endl;
   } catch (const std::bad_cast& e) {

@@ -17,7 +17,7 @@ link_libraries(${JSONCPP_LIBRARIES})
 
 include_directories(include ${JSONCPP_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/include)
 file(GLOB SRCS
-  "src/*.cpp"
+  "src/*.cpp" "${CMAKE_SOURCE_DIR}/src/*.cpp"
 )
 
 add_executable(DBusService ${SRCS})

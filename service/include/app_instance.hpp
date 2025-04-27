@@ -18,6 +18,8 @@ struct ConnParams {
   sdbus::ObjectPath objectPath;
 };
 
+/// @brief Класс для представления приложения
+///        как сущности `DBus`
 class AppInstance {
  private:
   unique_ptr<sdbus::IObject> object;
@@ -27,12 +29,20 @@ class AppInstance {
   mutex mu;
 
   const sdbus::SignalName signalName{"configurationChanged"};
-
+  
+  /// @brief Обработчик для метода `GetConfiguration`
+  /// @return Словарь с параметрами приложения
   map<string, sdbus::Variant> getConfigCallback() const;
 
+  /// @brief Обработчик для метода `ChangeConfiguration`
+  /// @param key Имя параметра для изменения
+  /// @param value Новое значение параметра
   void setConfigCallback(const string& key, const sdbus::Variant& value);
 
+  /// @brief Читает конфигурацию из файла по пути `configPath` в `dict`
   void readConfig();
+
+  /// @brief Записывает конфигурацию из `dict` в файл по пути `configPath`
   void writeConfig();
 
  public:

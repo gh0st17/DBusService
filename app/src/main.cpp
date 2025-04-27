@@ -3,7 +3,7 @@
 #include <memory>
 #include <thread>
 
-#include "app_params.hpp"
+#include "generic/params.hpp"
 #include "application.hpp"
 
 using namespace std;
@@ -30,6 +30,8 @@ int main(const int argc, const char* argv[]) {
   }
 }
 
+/// @brief Обработчик приложении
+/// @param configsPaths Массив путей к конфигурациям приложении
 void handleApplications(const vector<fs::path>& configsPaths) {
   list<unique_ptr<ConfManagerApplication>> apps;
   vector<thread> threads;

@@ -4,14 +4,11 @@
 
 using namespace std;
 
-#include "params.hpp"
+#include "generic/params.hpp"
 
 struct Params p;
 const char* usage = "{-p configs_path}";
 
-/// @brief Разбор аргументов программы
-/// @param argc Количество аргументов
-/// @param argv Массив строк аргументов
 void parse_params(const int argc, const char* argv[]) {
   for (size_t i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-p")) {

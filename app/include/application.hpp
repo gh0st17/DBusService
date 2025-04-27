@@ -15,6 +15,7 @@ namespace fs = std::filesystem;
 
 using config = map<string, any>;
 
+/// @brief Класс для имитации приложения
 class ConfManagerApplication {
  private:
   unique_ptr<sdbus::IConnection> conn;
@@ -31,11 +32,22 @@ class ConfManagerApplication {
     "/com/system/configurationManager/Application/"};
   const sdbus::SignalName signalName{"configurationChanged"};
 
+  /// @brief Читает файл конфигурации по пути в `configPath`
+  ///        и сохраняет его содержимое в dict
   void readConfig();
+
+  /// @brief Обработчик сигнала
+  /// @return Возращает функцию обработки сигнала
   sdbus::signal_handler signalCallback();
 
  public:
   ConfManagerApplication(const fs::path& configPath);
+
+  /*
+  * Удаляем конструкторы копирования
+  * Оставляем только конструкторы перемещения
+  */
+
   ConfManagerApplication(const ConfManagerApplication&) = delete;
   ConfManagerApplication(ConfManagerApplication&& other) noexcept
       : conn(std::move(other.conn)),
@@ -49,7 +61,6 @@ class ConfManagerApplication {
   }
 
   ConfManagerApplication& operator=(const ConfManagerApplication&) = delete;
-
   ConfManagerApplication& operator=(ConfManagerApplication&& other) noexcept {
     if (this != &other) {
       conn = std::move(other.conn);
@@ -60,8 +71,17 @@ class ConfManagerApplication {
     return *this;
   }
 
+  /// @brief Запускает прослушивание событии
   void start();
+
+  /// @brief Печатает `TimeoutPhrase`
   void printTimeoutPhrase();
+  
+  /// @brief Возвращает значение `Timeout`
+  /// @return `Timeout`
   const optional<uint> timeout();
+  
+  /// @brief Возвращает имя приложения
+  /// @return Имя приложения
   const string appName() const;
 };
