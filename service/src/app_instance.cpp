@@ -105,6 +105,11 @@ config AppInstance::getConfigCallback() const {
 
 void AppInstance::setConfigCallback(const string& key,
                                     const sdbus::Variant& value) {
+  if (dict.find(key) == dict.end()) {
+    cerr << "Unknown key '" << key << "', discarded" << endl;
+    return;
+  }
+
   dict[key] = value;
   try {
     writeConfig();

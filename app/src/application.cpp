@@ -24,6 +24,11 @@ sdbus::signal_handler ConfManagerApplication::signalCallback() {
     cout << appName() << ": Recieved key: " << key << endl;
 
     const lock_guard<mutex> lock(mu);
+    if (dict.find(key) == dict.end()) {
+      cerr << "Unknown key '" << key << "', discarded" << endl;
+      return;
+    }
+
     if (value.containsValueOfType<string>()) {
       dict[key] = value.get<string>();
     } else if (value.containsValueOfType<uint>()) {
