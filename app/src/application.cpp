@@ -23,6 +23,7 @@ sdbus::signal_handler ConfManagerApplication::signalCallback() {
 
     cout << appName() << ": Recieved key: " << key << endl;
 
+    const lock_guard<mutex> lock(mu);
     if (value.containsValueOfType<string>()) {
       dict[key] = value.get<string>();
     } else if (value.containsValueOfType<uint>()) {
@@ -82,6 +83,8 @@ void ConfManagerApplication::printTimeoutPhrase() {
   } else if (dict["TimeoutPhrase"].type() == typeid(string)) {
     string value = any_cast<string>(dict["TimeoutPhrase"]);
     cout << appName() << ": TimeoutPhrase: '" << value << "'" << endl;
+  } else {
+    cout << appName() << ": TimeoutPhrase is not string type\n";
   }
 }
 
