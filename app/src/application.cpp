@@ -75,11 +75,11 @@ void ConfManagerApplication::printTimeoutPhrase() {
   const lock_guard<mutex> lock(mu);
 
   if (dict.find("TimeoutPhrase") == dict.end()) {
-    cout << "TimeoutPhrase: <Key unset>\n";
+    cout << appName() << ": TimeoutPhrase: <Key unset>\n";
   }
   else if (dict["TimeoutPhrase"].type() == typeid(string)) {
     string value = any_cast<string>(dict["TimeoutPhrase"]);
-    cout << "TimeoutPhrase: '" << value << "'" << endl;    
+    cout << appName() << ": TimeoutPhrase: '" << value << "'" << endl;    
   }
 }
 
@@ -95,7 +95,7 @@ const optional<uint> ConfManagerApplication::timeout() {
     return value;
   }
   else {
-    cout << "Timeout is not integer type\n";
+    cout << appName() << ": Timeout is not uint type\n";
   }
 
   return {};

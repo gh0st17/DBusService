@@ -48,17 +48,17 @@ void handleApplications(const vector<fs::path>& configsPaths) {
     apps.back()->start();
 
     threads.push_back(thread([cma = apps.back().get(), &mu] () mutable {
+      uint timeout = 10;
       while (true) {
-        auto timeout = cma->timeout();
-        if (timeout.has_value()) {
-          this_thread::sleep_for(std::chrono::seconds(timeout.value()));
-          {
-            const lock_guard<mutex> lock(mu);
-            cout << "App name: " << cma->appName() << endl;
-            cma->printTimeoutPhrase();
-          }
+        auto timeoutOpt = cma->timeout();
+        if (timeoutOpt.has_value()) {
+          timeout = timeoutOpt.value();
         }
-        else break;
+        this_thread::sleep_for(chrono::seconds(timeout));
+        {
+          const lock_guard<mutex> lock(mu);
+          cma->printTimeoutPhrase();
+        }
       }
     }));
   }
