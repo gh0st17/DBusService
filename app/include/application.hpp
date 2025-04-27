@@ -1,7 +1,6 @@
 #pragma once
 #include <json/json.h>
 
-#include <any>
 #include <filesystem>
 #include <map>
 #include <memory>
@@ -13,7 +12,8 @@
 using namespace std;
 namespace fs = std::filesystem;
 
-using config = map<string, any>;
+/// @brief Псевдоним для типа конфигурации
+using config = map<string, sdbus::Variant>;
 
 /// @brief Класс для имитации приложения
 class ConfManagerApplication {
@@ -44,9 +44,9 @@ class ConfManagerApplication {
   ConfManagerApplication(const fs::path& configPath);
 
   /*
-  * Удаляем конструкторы копирования
-  * Оставляем только конструкторы перемещения
-  */
+   * Удаляем конструкторы копирования
+   * Оставляем только конструкторы перемещения
+   */
 
   ConfManagerApplication(const ConfManagerApplication&) = delete;
   ConfManagerApplication(ConfManagerApplication&& other) noexcept
@@ -76,11 +76,11 @@ class ConfManagerApplication {
 
   /// @brief Печатает `TimeoutPhrase`
   void printTimeoutPhrase();
-  
+
   /// @brief Возвращает значение `Timeout`
   /// @return `Timeout`
   const optional<uint> timeout();
-  
+
   /// @brief Возвращает имя приложения
   /// @return Имя приложения
   const string appName() const;

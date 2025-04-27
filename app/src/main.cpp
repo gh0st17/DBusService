@@ -3,8 +3,8 @@
 #include <memory>
 #include <thread>
 
-#include "generic/params.hpp"
 #include "application.hpp"
+#include "generic/params.hpp"
 
 using namespace std;
 

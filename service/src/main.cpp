@@ -10,7 +10,7 @@ int main(const int argc, const char* argv[]) {
     parse_params(argc, argv);
 
     DBusService(std::move(p.configsPaths)).startService();
-    
+
   } catch (const fs::filesystem_error& e) {
     cerr << "filesystem error: " << e.what() << endl;
   } catch (const std::bad_cast& e) {

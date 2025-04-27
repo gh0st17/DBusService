@@ -2,6 +2,7 @@
 #include <json/json.h>
 
 #include <map>
+#include <list>
 #include <memory>
 
 #include "app_instance.hpp"
@@ -9,17 +10,15 @@
 
 using namespace std;
 
-using config = map<string, sdbus::Variant>;
-
 /// @brief Класс для представления `DBus` сервиса
 class DBusService {
  private:
-  vector< unique_ptr<AppInstance> > instances;
+  list<unique_ptr<AppInstance> > instances;
   unique_ptr<sdbus::IConnection> conn;
 
   /*
-  * Параметры сервиса
-  */
+   * Параметры сервиса
+   */
 
   const sdbus::ServiceName serviceName{"com.system.configurationManager"};
   const sdbus::InterfaceName interfaceName{sdbus::InterfaceName(

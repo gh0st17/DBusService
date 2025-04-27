@@ -1,16 +1,18 @@
 #pragma once
-#include <map>
-#include <mutex>
-#include <memory>
 #include <filesystem>
+#include <map>
+#include <memory>
+#include <mutex>
 
 #include "sdbus-c++/sdbus-c++.h"
 
 using namespace std;
 namespace fs = std::filesystem;
 
+/// @brief Псевдоним для типа конфигурации
 using config = map<string, sdbus::Variant>;
 
+/// @brief Структура для передачи параметров
 struct ConnParams {
   sdbus::IConnection& conn;
   sdbus::InterfaceName interfaceName;
@@ -29,7 +31,7 @@ class AppInstance {
   mutex mu;
 
   const sdbus::SignalName signalName{"configurationChanged"};
-  
+
   /// @brief Обработчик для метода `GetConfiguration`
   /// @return Словарь с параметрами приложения
   map<string, sdbus::Variant> getConfigCallback() const;

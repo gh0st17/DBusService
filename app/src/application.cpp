@@ -1,7 +1,8 @@
-#include "application.hpp"
-
 #include <fstream>
 #include <iostream>
+
+#include "generic/generic.hpp"
+#include "application.hpp"
 
 ConfManagerApplication::ConfManagerApplication(const fs::path& configPath) {
   this->configPath = configPath;
@@ -29,51 +30,15 @@ sdbus::signal_handler ConfManagerApplication::signalCallback() {
       return;
     }
 
-    if (value.containsValueOfType<string>()) {
-      dict[key] = value.get<string>();
-    } else if (value.containsValueOfType<uint>()) {
-      dict[key] = value.get<uint>();
-    } else if (value.containsValueOfType<int>()) {
-      dict[key] = value.get<int>();
-    } else if (value.containsValueOfType<bool>()) {
-      dict[key] = value.get<bool>();
-    } else {
-      cerr << "Unknown type of key '" << key << "'" << endl;
-    }
+    dict[key] = value;
   };
 
   return sh;
 }
 
 void ConfManagerApplication::readConfig() {
-  ifstream ifs(configPath);
-  if (!ifs.is_open()) {
-    throw std::runtime_error("Can't open file: " + configPath.string());
-  }
-
-  Json::Value root;
-  ifs >> root;
-
   const lock_guard<mutex> lock(mu);
-  for (const auto& key : root.getMemberNames()) {
-    const Json::Value& val = root[key];
-
-    cout << key << ": " << val.asString() << endl;
-
-    if (val.isUInt()) {
-      dict[key] = static_cast<uint>(val.asUInt());
-    } else if (val.isInt()) {
-      dict[key] = static_cast<int>(val.asInt());
-    } else if (val.isString()) {
-      dict[key] = val.asString();
-    } else if (val.isBool()) {
-      dict[key] = val.asBool();
-    } else {
-      std::cerr << "Unknown type: " << key << std::endl;
-    }
-  }
-
-  ifs.close();
+  generic::readConfig(dict, configPath);
 }
 
 void ConfManagerApplication::start() {
@@ -85,8 +50,8 @@ void ConfManagerApplication::printTimeoutPhrase() {
 
   if (dict.find("TimeoutPhrase") == dict.end()) {
     cout << appName() << ": TimeoutPhrase: <Key unset>\n";
-  } else if (dict["TimeoutPhrase"].type() == typeid(string)) {
-    string value = any_cast<string>(dict["TimeoutPhrase"]);
+  } else if (dict["TimeoutPhrase"].containsValueOfType<string>()) {
+    string value = dict["TimeoutPhrase"].get<string>();
     cout << appName() << ": TimeoutPhrase: '" << value << "'" << endl;
   } else {
     cout << appName() << ": TimeoutPhrase is not string type\n";
@@ -97,10 +62,9 @@ const optional<uint> ConfManagerApplication::timeout() {
   const lock_guard<mutex> lock(mu);
 
   if (dict.find("Timeout") == dict.end()) {
-    cout << "<Timeout unset>\n";
-  } else if (dict["Timeout"].type() == typeid(uint)) {
-    uint value = any_cast<uint>(dict["Timeout"]);
-    return value;
+    cout << appName() << ": <Timeout unset>\n";
+  } else if (dict["Timeout"].containsValueOfType<uint>()) {
+    return dict["Timeout"].get<uint>();
   } else {
     cout << appName() << ": Timeout is not uint type\n";
   }
