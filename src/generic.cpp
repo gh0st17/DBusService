@@ -5,7 +5,7 @@ namespace generic {
 void readConfig(map<string, sdbus::Variant>& dict, const fs::path& configPath) {
   ifstream ifs(configPath);
   if (!ifs.is_open()) {
-    throw std::runtime_error("Can't open file: " + configPath.string());
+    throw std::runtime_error("can't open file: " + configPath.string());
   }
 
   Json::Value root;
@@ -16,16 +16,12 @@ void readConfig(map<string, sdbus::Variant>& dict, const fs::path& configPath) {
 
     cout << key << ": " << val.asString() << endl;
 
-    if (val.isUInt()) {
-      dict[key] = sdbus::Variant(static_cast<uint>(val.asUInt()));
-    } else if (val.isInt()) {
-      dict[key] = sdbus::Variant(static_cast<int>(val.asInt()));
-    } else if (val.isString()) {
+    if (val.isString()) {
       dict[key] = sdbus::Variant(val.asString());
-    } else if (val.isBool()) {
-      dict[key] = sdbus::Variant(val.asBool());
+    } else if (val.isUInt()) {
+      dict[key] = sdbus::Variant(static_cast<uint>(val.asUInt()));
     } else {
-      cerr << "Unknown type: " << key << std::endl;
+      cerr << "unknown type: " << key << std::endl;
     }
   }
 

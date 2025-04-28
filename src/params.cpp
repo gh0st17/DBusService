@@ -15,13 +15,13 @@ void parse_params(const int argc, const char* argv[]) {
       if (++i < argc)
         p.configsPaths = getJsonFiles(argv[i]);
       else
-        throw invalid_argument("Input directory missing");
+        throw invalid_argument("input directory missing");
     } else
-      cout << "Unknown argument '" << argv[i] << "'" << endl;
+      cout << "unknown argument '" << argv[i] << "'" << endl;
   }
 
   if (p.configsPaths.size() == 0) {
-    throw invalid_argument("Input directory doesn't contains any json file\n");
+    throw invalid_argument("input directory doesn't contains any json file\n");
   }
 }
 

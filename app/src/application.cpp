@@ -23,11 +23,11 @@ sdbus::signal_handler ConfManagerApplication::signalCallback() {
     sdbus::Variant value;
     signal >> key >> value;
 
-    cout << appName() << ": Recieved key: " << key << endl;
+    cout << appName() << ": recieved key: " << key << endl;
 
     const lock_guard<mutex> lock(mu);
     if (dict.find(key) == dict.end()) {
-      cerr << "Unknown key '" << key << "', discarded" << endl;
+      cerr << "unknown key '" << key << "', discarded" << endl;
       return;
     }
 
@@ -50,7 +50,7 @@ void ConfManagerApplication::printTimeoutPhrase() {
   const lock_guard<mutex> lock(mu);
 
   if (dict.find("TimeoutPhrase") == dict.end()) {
-    cout << appName() << ": TimeoutPhrase: <Key unset>\n";
+    cout << appName() << ": TimeoutPhrase: <key unset>\n";
   } else if (dict["TimeoutPhrase"].containsValueOfType<string>()) {
     string value = dict["TimeoutPhrase"].get<string>();
     cout << appName() << ": TimeoutPhrase: '" << value << "'" << endl;

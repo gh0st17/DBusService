@@ -49,7 +49,7 @@ void AppInstance::writeConfig() {
   const lock_guard<mutex> lock(mu);
   ofstream ofs(configPath);
   if (!ofs.is_open()) {
-    throw std::runtime_error("Can't write file " + configPath.string());
+    throw std::runtime_error("can't write file " + configPath.string());
   }
 
   Json::Value root;
@@ -59,12 +59,8 @@ void AppInstance::writeConfig() {
       root[key] = value.get<string>();
     } else if (value.containsValueOfType<uint>()) {
       root[key] = value.get<uint>();
-    } else if (value.containsValueOfType<int>()) {
-      root[key] = value.get<int>();
-    } else if (value.containsValueOfType<bool>()) {
-      root[key] = value.get<bool>();
     } else {
-      cerr << "Unknown type: " << key << endl;
+      cerr << "unknown type: " << key << endl;
     }
   }
   ofs << root;
@@ -101,7 +97,7 @@ sdbus::method_callback AppInstance::setConfigCallback() {
     };
 
     if (dict.find(key) == dict.end()) {
-      ss << "Unknown key '" << key << "', discarded";
+      ss << "unknown key '" << key << "', discarded";
       handleError(ss.str());
       return;
     }
