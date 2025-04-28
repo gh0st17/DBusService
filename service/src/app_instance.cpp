@@ -102,7 +102,15 @@ sdbus::method_callback AppInstance::setConfigCallback() {
       return;
     }
 
-    dict[key] = value;
+    if (!strcmp(dict[key].peekValueType(), value.peekValueType())) {
+      dict[key] = value;
+    } else {
+      ss << "invalid type of key '" << key << "', expected '"
+         << dict[key].peekValueType() << "'";
+      handleError(ss.str());
+      return;
+    }
+
     try {
       writeConfig();
     } catch (const fs::filesystem_error& e) {
