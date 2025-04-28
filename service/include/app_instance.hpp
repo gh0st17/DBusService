@@ -33,18 +33,19 @@ class AppInstance {
   const sdbus::SignalName signalName{"configurationChanged"};
 
   /// @brief Обработчик для метода `GetConfiguration`
-  /// @return Словарь с параметрами приложения
-  map<string, sdbus::Variant> getConfigCallback() const;
+  /// @return Функцию-обработчик
+  sdbus::method_callback getConfigCallback() const;
 
-  /// @brief Обработчик для метода `ChangeConfiguration`
-  /// @param key Имя параметра для изменения
-  /// @param value Новое значение параметра
-  void setConfigCallback(const string& key, const sdbus::Variant& value);
+  /// @brief Определяет обработчик для метода `ChangeConfiguration`
+  /// @return Функцию-обработчик
+  sdbus::method_callback setConfigCallback();
 
-  /// @brief Читает конфигурацию из файла по пути `configPath` в `dict`
+  /// @brief Читает конфигурацию из файла
+  ///        по пути `configPath` в `dict`
   void readConfig();
 
-  /// @brief Записывает конфигурацию из `dict` в файл по пути `configPath`
+  /// @brief Записывает конфигурацию из `dict`
+  ///        в файл по пути `configPath`
   void writeConfig();
 
  public:

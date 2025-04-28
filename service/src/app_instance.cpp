@@ -1,11 +1,13 @@
+#include "app_instance.hpp"
+
+#include <json/json.h>
+
 #include <filesystem>
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <sstream>
 
-#include <json/json.h>
-
-#include "app_instance.hpp"
 #include "generic/generic.hpp"
 
 namespace fs = std::filesystem;
@@ -23,24 +25,23 @@ AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
   object =
     sdbus::createObject(cp.conn, sdbus::ObjectPath(cp.objectPath + appName));
 
-  auto setConfigCallback = [this](const string& key,
-                                  const sdbus::Variant& value) {
-    this->setConfigCallback(key, value);
-  };
-
   object
-    ->addVTable(sdbus::registerMethod(sdbus::MethodName("ChangeConfiguration"))
-                  .implementedAs(setConfigCallback))
-    .forInterface(sdbus::InterfaceName(cp.interfaceName));
-
-  auto getConfigCallback = [this]() { return this->getConfigCallback(); };
-
-  object
-    ->addVTable(sdbus::registerMethod(sdbus::MethodName("GetConfiguration"))
-                  .implementedAs(getConfigCallback))
-    .forInterface(cp.interfaceName);
-
-  object->addVTable(sdbus::registerSignal(sdbus::SignalName(signalName)))
+    ->addVTable(
+      sdbus::MethodVTableItem{sdbus::MethodName{"ChangeConfiguration"},
+                              sdbus::Signature{"sv"},
+                              {},
+                              sdbus::Signature{"s"},
+                              {},
+                              setConfigCallback(),
+                              {}},
+      sdbus::MethodVTableItem{sdbus::MethodName{"GetConfiguration"},
+                              sdbus::Signature{""},
+                              {},
+                              sdbus::Signature{"a{sv}"},
+                              {},
+                              getConfigCallback(),
+                              {}},
+      sdbus::SignalVTableItem{signalName, sdbus::Signature{"sv"}, {}, {}})
     .forInterface(cp.interfaceName);
 }
 
@@ -76,39 +77,66 @@ void AppInstance::readConfig() {
   generic::readConfig(dict, configPath);
 }
 
-config AppInstance::getConfigCallback() const {
-  return dict;
+sdbus::method_callback AppInstance::getConfigCallback() const {
+  return [this](sdbus::MethodCall call) {
+    auto reply = call.createReply();
+    reply << dict;
+    reply.send();
+  };
 }
 
-void AppInstance::setConfigCallback(const string& key,
-                                    const sdbus::Variant& value) {
-  if (dict.find(key) == dict.end()) {
-    cerr << "Unknown key '" << key << "', discarded" << endl;
-    return;
-  }
+sdbus::method_callback AppInstance::setConfigCallback() {
+  return [this](sdbus::MethodCall call) {
+    string key;
+    sdbus::Variant value;
 
-  dict[key] = value;
-  try {
-    writeConfig();
-  } catch (const fs::filesystem_error& e) {
-    cerr << "filesystem error while writing conf: " << e.what() << endl;
-    return;
-  } catch (const Json::Exception& e) {
-    cerr << "json error while writing conf: " << e.what() << endl;
-    return;
-  } catch (const std::exception& e) {
-    cerr << "unknown error while writing conf: " << e.what() << endl;
-    return;
-  }
+    call >> key >> value;
+    auto reply = call.createReply();
+    stringstream ss;
 
-  try {
-    auto signal =
-      object->createSignal(this->cp->interfaceName, this->cp->signalName);
-    signal << key << dict[key];
-    object->emitSignal(signal);
-  } catch (const sdbus::Error& e) {
-    cerr << "sdbus error while signaling: " << e.what() << endl;
-  } catch (const std::exception& e) {
-    cerr << "unknown error while signaling: " << e.what() << endl;
-  }
+    auto handleError = [&](const string& message) {
+      cerr << message;
+      reply << message;
+      reply.send();
+    };
+
+    if (dict.find(key) == dict.end()) {
+      ss << "Unknown key '" << key << "', discarded" << endl;
+      handleError(ss.str());
+      return;
+    }
+
+    dict[key] = value;
+    try {
+      writeConfig();
+    } catch (const fs::filesystem_error& e) {
+      ss << "filesystem error while writing conf: " << e.what() << endl;
+      handleError(ss.str());
+      return;
+    } catch (const Json::Exception& e) {
+      ss << "json error while writing conf: " << e.what() << endl;
+      handleError(ss.str());
+      return;
+    } catch (const std::exception& e) {
+      cerr << "unknown error while writing conf: " << e.what() << endl;
+      handleError(ss.str());
+      return;
+    }
+
+    try {
+      reply << string{"Key '" + key + "' was set"};
+      reply.send();
+
+      auto signal =
+        object->createSignal(this->cp->interfaceName, this->cp->signalName);
+      signal << key << dict[key];
+      object->emitSignal(signal);
+    } catch (const sdbus::Error& e) {
+      ss << "sdbus error while signaling: " << e.what() << endl;
+      handleError(ss.str());
+    } catch (const std::exception& e) {
+      ss << "unknown error while signaling: " << e.what() << endl;
+      handleError(ss.str());
+    }
+  };
 }
