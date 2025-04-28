@@ -95,13 +95,13 @@ sdbus::method_callback AppInstance::setConfigCallback() {
     stringstream ss;
 
     auto handleError = [&](const string& message) {
-      cerr << message;
+      cerr << message << endl;
       reply << message;
       reply.send();
     };
 
     if (dict.find(key) == dict.end()) {
-      ss << "Unknown key '" << key << "', discarded" << endl;
+      ss << "Unknown key '" << key << "', discarded";
       handleError(ss.str());
       return;
     }
@@ -110,15 +110,15 @@ sdbus::method_callback AppInstance::setConfigCallback() {
     try {
       writeConfig();
     } catch (const fs::filesystem_error& e) {
-      ss << "filesystem error while writing conf: " << e.what() << endl;
+      ss << "filesystem error while writing conf: " << e.what();
       handleError(ss.str());
       return;
     } catch (const Json::Exception& e) {
-      ss << "json error while writing conf: " << e.what() << endl;
+      ss << "json error while writing conf: " << e.what();
       handleError(ss.str());
       return;
     } catch (const std::exception& e) {
-      cerr << "unknown error while writing conf: " << e.what() << endl;
+      cerr << "unknown error while writing conf: " << e.what();
       handleError(ss.str());
       return;
     }
@@ -132,10 +132,10 @@ sdbus::method_callback AppInstance::setConfigCallback() {
       signal << key << dict[key];
       object->emitSignal(signal);
     } catch (const sdbus::Error& e) {
-      ss << "sdbus error while signaling: " << e.what() << endl;
+      ss << "sdbus error while signaling: " << e.what();
       handleError(ss.str());
     } catch (const std::exception& e) {
-      ss << "unknown error while signaling: " << e.what() << endl;
+      ss << "unknown error while signaling: " << e.what();
       handleError(ss.str());
     }
   };
