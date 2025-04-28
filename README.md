@@ -76,4 +76,10 @@ gdbus call --session --dest com.system.configurationManager \
  	"TimeoutPhrase" "<'STOP'>"
 ```
 
-5. В окне с клиентской частью приложение с именем `confManagerApplication1` обновит значение ключа `TimeoutPhrase` на значение равное `STOP`
+5. Появится результат вызова метода `ChangeConfiguration`
+
+```
+("Key 'TimeoutPhrase' was set",)
+```
+
+При этом в окне с клиентской частью приложение с именем `confManagerApplication1` обновит значение ключа `TimeoutPhrase` на значение равное `STOP`
