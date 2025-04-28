@@ -18,7 +18,7 @@
 1. Откройте окно терминала
 2. Выполните от имени супер-пользователя следующую команду для установки пакетов:
 
-```
+```bash
 apt install -y cmake build-essential libjsoncpp-dev libjsoncpp25 python3-pkgconfig libsystemd-dev
 ```
 3. Можно перейти к следующему разделу.
@@ -29,14 +29,14 @@ apt install -y cmake build-essential libjsoncpp-dev libjsoncpp25 python3-pkgconf
   - Загрузите как архив и распакуйте, откройте распакованную директорию в окне терминала;
   - Используйте утилиту `git`, в окне терминала выполните.
 
-```
+```bash
 git clone https://github.com/gh0st17/DBusService.git
 cd DBusService
 ```
 
 2. Выполните в окне терминала команду для подготовки файлов для сборки:
 
-```
+```bash
 cmake -G Unix\ Makefiles -DCMAKE_BUILD_TYPE=Release -B build
 cmake --build build
 ```
@@ -45,7 +45,7 @@ cmake --build build
 
 1. После сборки серверная часть сервиса запускается следующей командой:
 
-```
+```bash
 ./build/service/DBusService -p configs
 ```
 
@@ -65,15 +65,15 @@ Entering into event loop
 ./build/app/confManagerApplication -p configs
 ```
 
-При успешном запуске сообщения `TimeoutPhrase` каждого имитируемого приложения начнут выводиться, каждый через свой `Timiout` интервал.
+При успешном запуске сообщения ключи `TimeoutPhrase` каждого имитируемого приложения начнут выводиться, каждый через свой `Timeout` интервал.
 
 4. Создаете еще одно окно терминала и запустите команду:
 
-```
+```bash
 gdbus call --session --dest com.system.configurationManager \
 	--object-path /com/system/configurationManager/Application/confManagerApplication1 \
 	--method com.system.configurationManager.Application.Configuration.ChangeConfiguration \
  	"TimeoutPhrase" "<'STOP'>"
 ```
 
-5. В окне с клиентской частью приложение с именем `confManagerApplication1` обновит значение `TimeoutPhrase` на значение равное `STOP`
+5. В окне с клиентской частью приложение с именем `confManagerApplication1` обновит значение ключа `TimeoutPhrase` на значение равное `STOP`
