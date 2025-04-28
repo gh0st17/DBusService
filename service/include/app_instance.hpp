@@ -24,13 +24,13 @@ struct ConnParams {
 ///        как сущности `DBus`
 class AppInstance {
  private:
-  unique_ptr<sdbus::IObject> object;
-  unique_ptr<ConnParams> cp;
-  fs::path configPath;
-  config dict;
-  mutex mu;
+  unique_ptr<sdbus::IObject> object_;
+  unique_ptr<ConnParams> cp_;
+  fs::path configPath_;
+  config dict_;
+  mutex mu_;
 
-  const sdbus::SignalName signalName{"configurationChanged"};
+  const sdbus::SignalName signalName_{"configurationChanged"};
 
   /// @brief Обработчик для метода `GetConfiguration`
   /// @return Функцию-обработчик
@@ -41,11 +41,11 @@ class AppInstance {
   sdbus::method_callback setConfigCallback();
 
   /// @brief Читает конфигурацию из файла
-  ///        по пути `configPath` в `dict`
+  ///        по пути `configPath_` в `dict_`
   void readConfig();
 
-  /// @brief Записывает конфигурацию из `dict`
-  ///        в файл по пути `configPath`
+  /// @brief Записывает конфигурацию из `dict_`
+  ///        в файл по пути `configPath_`
   void writeConfig();
 
  public:

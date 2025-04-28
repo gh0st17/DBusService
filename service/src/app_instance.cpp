@@ -13,19 +13,19 @@
 namespace fs = std::filesystem;
 
 AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
-  this->configPath = configPath;
+  configPath_ = configPath;
   readConfig();
 
-  this->cp = make_unique<ConnParams>(cp);
+  cp_ = make_unique<ConnParams>(cp);
   const string appName = configPath.stem().string();
 
   cout << "Creating configuration listener instance for " << appName << endl;
   cout << "Configuration path is '" << configPath.string() << "'" << endl;
 
-  object =
+  object_ =
     sdbus::createObject(cp.conn, sdbus::ObjectPath(cp.objectPath + appName));
 
-  object
+  object_
     ->addVTable(
       sdbus::MethodVTableItem{sdbus::MethodName{"ChangeConfiguration"},
                               sdbus::Signature{"sv"},
@@ -41,20 +41,20 @@ AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
                               {},
                               getConfigCallback(),
                               {}},
-      sdbus::SignalVTableItem{signalName, sdbus::Signature{"sv"}, {}, {}})
+      sdbus::SignalVTableItem{signalName_, sdbus::Signature{"sv"}, {}, {}})
     .forInterface(cp.interfaceName);
 }
 
 void AppInstance::writeConfig() {
-  const lock_guard<mutex> lock(mu);
-  ofstream ofs(configPath);
+  const lock_guard<mutex> lock(mu_);
+  ofstream ofs(configPath_);
   if (!ofs.is_open()) {
-    throw std::runtime_error("can't write file " + configPath.string());
+    throw std::runtime_error("can't write file " + configPath_.string());
   }
 
   Json::Value root;
 
-  for (const auto& [key, value] : dict) {
+  for (const auto& [key, value] : dict_) {
     if (value.containsValueOfType<string>()) {
       root[key] = value.get<string>();
     } else if (value.containsValueOfType<uint>()) {
@@ -69,14 +69,14 @@ void AppInstance::writeConfig() {
 }
 
 void AppInstance::readConfig() {
-  const lock_guard<mutex> lock(mu);
-  generic::readConfig(dict, configPath);
+  const lock_guard<mutex> lock(mu_);
+  generic::readConfig(dict_, configPath_);
 }
 
 sdbus::method_callback AppInstance::getConfigCallback() const {
   return [this](sdbus::MethodCall call) {
     auto reply = call.createReply();
-    reply << dict;
+    reply << dict_;
     reply.send();
   };
 }
@@ -96,17 +96,17 @@ sdbus::method_callback AppInstance::setConfigCallback() {
       reply.send();
     };
 
-    if (dict.find(key) == dict.end()) {
+    if (dict_.find(key) == dict_.end()) {
       ss << "unknown key '" << key << "', discarded";
       handleError(ss.str());
       return;
     }
 
-    if (!strcmp(dict[key].peekValueType(), value.peekValueType())) {
-      dict[key] = value;
+    if (!strcmp(dict_[key].peekValueType(), value.peekValueType())) {
+      dict_[key] = value;
     } else {
       ss << "invalid type of key '" << key << "', expected '"
-         << dict[key].peekValueType() << "'";
+         << dict_[key].peekValueType() << "'";
       handleError(ss.str());
       return;
     }
@@ -131,10 +131,9 @@ sdbus::method_callback AppInstance::setConfigCallback() {
       reply << string{"Key '" + key + "' was set"};
       reply.send();
 
-      auto signal =
-        object->createSignal(this->cp->interfaceName, this->cp->signalName);
-      signal << key << dict[key];
-      object->emitSignal(signal);
+      auto signal = object_->createSignal(cp_->interfaceName, cp_->signalName);
+      signal << key << dict_[key];
+      object_->emitSignal(signal);
     } catch (const sdbus::Error& e) {
       ss << "sdbus error while signaling: " << e.what();
       handleError(ss.str());

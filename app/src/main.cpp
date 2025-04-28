@@ -33,11 +33,11 @@ int main(const int argc, const char* argv[]) {
 /// @brief Обработчик приложении
 /// @param configsPaths Массив путей к конфигурациям приложении
 void handleApplications(const vector<fs::path>& configsPaths) {
-  list<unique_ptr<ConfManagerApplication>> apps;
-  vector<thread> threads;
   mutex mu;
+  vector<thread> threads;
   threads.reserve(configsPaths.size());
 
+  list<unique_ptr<ConfManagerApplication>> apps;
   for (const auto& path : configsPaths) {
     auto app = make_unique<ConfManagerApplication>(path);
     apps.push_back(std::move(app));

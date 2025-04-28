@@ -18,22 +18,21 @@ using config = map<string, sdbus::Variant>;
 /// @brief Класс для имитации приложения
 class ConfManagerApplication {
  private:
-  unique_ptr<sdbus::IConnection> conn;
-  unique_ptr<sdbus::IProxy> proxy;
-  fs::path configPath;
-  config dict;
+  unique_ptr<sdbus::IConnection> conn_;
+  unique_ptr<sdbus::IProxy> proxy_;
+  fs::path configPath_;
+  config dict_;
+  mutex mu_;
 
-  mutex mu;
-
-  const sdbus::ServiceName serviceName{"com.system.configurationManager"};
-  const sdbus::InterfaceName interfaceName{sdbus::InterfaceName(
-    static_cast<string>(serviceName) + ".Application.Configuration")};
-  const sdbus::ObjectPath objectPath{
+  const sdbus::ServiceName serviceName_{"com.system.configurationManager"};
+  const sdbus::InterfaceName interfaceName_{sdbus::InterfaceName(
+    static_cast<string>(serviceName_) + ".Application.Configuration")};
+  const sdbus::ObjectPath objectPath_{
     "/com/system/configurationManager/Application/"};
-  const sdbus::SignalName signalName{"configurationChanged"};
+  const sdbus::SignalName signalName_{"configurationChanged"};
 
-  /// @brief Читает файл конфигурации по пути в `configPath`
-  ///        и сохраняет его содержимое в dict
+  /// @brief Читает файл конфигурации по пути в `configPath_`
+  ///        и сохраняет его содержимое в `dict_`
   void readConfig();
 
   /// @brief Обработчик сигнала
@@ -50,23 +49,23 @@ class ConfManagerApplication {
 
   ConfManagerApplication(const ConfManagerApplication&) = delete;
   ConfManagerApplication(ConfManagerApplication&& other) noexcept
-      : conn(std::move(other.conn)),
-        proxy(std::move(other.proxy)),
-        configPath(std::move(other.configPath)),
-        dict(std::move(other.dict)),
-        serviceName(other.serviceName),
-        interfaceName(other.interfaceName),
-        objectPath(other.objectPath),
-        signalName(other.signalName) {
+      : conn_(std::move(other.conn_)),
+        proxy_(std::move(other.proxy_)),
+        configPath_(std::move(other.configPath_)),
+        dict_(std::move(other.dict_)),
+        serviceName_(other.serviceName_),
+        interfaceName_(other.interfaceName_),
+        objectPath_(other.objectPath_),
+        signalName_(other.signalName_) {
   }
 
   ConfManagerApplication& operator=(const ConfManagerApplication&) = delete;
   ConfManagerApplication& operator=(ConfManagerApplication&& other) noexcept {
     if (this != &other) {
-      conn = std::move(other.conn);
-      proxy = std::move(other.proxy);
-      configPath = std::move(other.configPath);
-      dict = std::move(other.dict);
+      conn_ = std::move(other.conn_);
+      proxy_ = std::move(other.proxy_);
+      configPath_ = std::move(other.configPath_);
+      dict_ = std::move(other.dict_);
     }
     return *this;
   }

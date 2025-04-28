@@ -13,18 +13,18 @@ using namespace std;
 /// @brief Класс для представления `DBus` сервиса
 class DBusService {
  private:
-  list<unique_ptr<AppInstance> > instances;
-  unique_ptr<sdbus::IConnection> conn;
+  list<unique_ptr<AppInstance> > instances_;
+  unique_ptr<sdbus::IConnection> conn_;
 
   /*
    * Параметры сервиса
    */
 
-  const sdbus::ServiceName serviceName{"com.system.configurationManager"};
-  const sdbus::InterfaceName interfaceName{sdbus::InterfaceName(
-    static_cast<string>(serviceName) + ".Application.Configuration")};
-  const sdbus::SignalName signalName{"configurationChanged"};
-  const sdbus::ObjectPath objectPath{"/com/system/configurationManager/"};
+  const sdbus::ServiceName serviceName_{"com.system.configurationManager"};
+  const sdbus::InterfaceName interfaceName_{sdbus::InterfaceName(
+    static_cast<string>(serviceName_) + ".Application.Configuration")};
+  const sdbus::SignalName signalName_{"configurationChanged"};
+  const sdbus::ObjectPath objectPath_{"/com/system/configurationManager/"};
 
   /// @brief Запускает одну сущность приложения `AppInstance`
   /// @param configPath Путь к конфигурационному файлу приложения

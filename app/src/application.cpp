@@ -6,15 +6,15 @@
 #include "generic/generic.hpp"
 
 ConfManagerApplication::ConfManagerApplication(const fs::path& configPath) {
-  this->configPath = configPath;
+  configPath_ = configPath;
   readConfig();
-  const string appName = configPath.stem().string();
+  const string appName = configPath_.stem().string();
 
-  conn = sdbus::createSessionBusConnection();
+  conn_ = sdbus::createSessionBusConnection();
 
-  proxy = sdbus::createProxy(*conn, serviceName,
-                             sdbus::ObjectPath(objectPath + appName));
-  proxy->registerSignalHandler(interfaceName, signalName, signalCallback());
+  proxy_ = sdbus::createProxy(*conn_, serviceName_,
+                              sdbus::ObjectPath(objectPath_ + appName));
+  proxy_->registerSignalHandler(interfaceName_, signalName_, signalCallback());
 }
 
 sdbus::signal_handler ConfManagerApplication::signalCallback() {
@@ -25,34 +25,34 @@ sdbus::signal_handler ConfManagerApplication::signalCallback() {
 
     cout << appName() << ": recieved key: " << key << endl;
 
-    const lock_guard<mutex> lock(mu);
-    if (dict.find(key) == dict.end()) {
+    const lock_guard<mutex> lock(mu_);
+    if (dict_.find(key) == dict_.end()) {
       cerr << "unknown key '" << key << "', discarded" << endl;
       return;
     }
 
-    dict[key] = value;
+    dict_[key] = value;
   };
 
   return sh;
 }
 
 void ConfManagerApplication::readConfig() {
-  const lock_guard<mutex> lock(mu);
-  generic::readConfig(dict, configPath);
+  const lock_guard<mutex> lock(mu_);
+  generic::readConfig(dict_, configPath_);
 }
 
 void ConfManagerApplication::start() {
-  conn->enterEventLoopAsync();
+  conn_->enterEventLoopAsync();
 }
 
 void ConfManagerApplication::printTimeoutPhrase() {
-  const lock_guard<mutex> lock(mu);
+  const lock_guard<mutex> lock(mu_);
 
-  if (dict.find("TimeoutPhrase") == dict.end()) {
+  if (dict_.find("TimeoutPhrase") == dict_.end()) {
     cout << appName() << ": TimeoutPhrase: <key unset>\n";
-  } else if (dict["TimeoutPhrase"].containsValueOfType<string>()) {
-    string value = dict["TimeoutPhrase"].get<string>();
+  } else if (dict_["TimeoutPhrase"].containsValueOfType<string>()) {
+    string value = dict_["TimeoutPhrase"].get<string>();
     cout << appName() << ": TimeoutPhrase: '" << value << "'" << endl;
   } else {
     cout << appName() << ": TimeoutPhrase is not string type\n";
@@ -60,12 +60,12 @@ void ConfManagerApplication::printTimeoutPhrase() {
 }
 
 const optional<uint> ConfManagerApplication::timeout() {
-  const lock_guard<mutex> lock(mu);
+  const lock_guard<mutex> lock(mu_);
 
-  if (dict.find("Timeout") == dict.end()) {
+  if (dict_.find("Timeout") == dict_.end()) {
     cout << appName() << ": <Timeout unset>\n";
-  } else if (dict["Timeout"].containsValueOfType<uint>()) {
-    return dict["Timeout"].get<uint>();
+  } else if (dict_["Timeout"].containsValueOfType<uint>()) {
+    return dict_["Timeout"].get<uint>();
   } else {
     cout << appName() << ": Timeout is not uint type\n";
   }
@@ -74,5 +74,5 @@ const optional<uint> ConfManagerApplication::timeout() {
 }
 
 const string ConfManagerApplication::appName() const {
-  return configPath.stem().string();
+  return configPath_.stem().string();
 }
