@@ -1,8 +1,9 @@
+#include "application.hpp"
+
 #include <fstream>
 #include <iostream>
 
 #include "generic/generic.hpp"
-#include "application.hpp"
 
 ConfManagerApplication::ConfManagerApplication(const fs::path& configPath) {
   this->configPath = configPath;

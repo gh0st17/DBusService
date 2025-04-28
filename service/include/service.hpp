@@ -1,8 +1,8 @@
 #pragma once
 #include <json/json.h>
 
-#include <map>
 #include <list>
+#include <map>
 #include <memory>
 
 #include "app_instance.hpp"
