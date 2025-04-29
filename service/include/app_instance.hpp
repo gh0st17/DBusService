@@ -34,7 +34,7 @@ class AppInstance {
 
   /// @brief Обработчик для метода `GetConfiguration`
   /// @return Функцию-обработчик
-  sdbus::method_callback getConfigCallback() const;
+  sdbus::method_callback getConfigCallback();
 
   /// @brief Определяет обработчик для метода `ChangeConfiguration`
   /// @return Функцию-обработчик

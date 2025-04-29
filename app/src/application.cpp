@@ -19,19 +19,21 @@ ConfManagerApplication::ConfManagerApplication(const fs::path& configPath) {
 
 sdbus::signal_handler ConfManagerApplication::signalCallback() {
   sdbus::signal_handler sh = [this](sdbus::Signal signal) {
-    string key;
-    sdbus::Variant value;
-    signal >> key >> value;
+    thread([this, signal = std::move(signal)]() mutable {
+      string key;
+      sdbus::Variant value;
+      signal >> key >> value;
 
-    cout << appName() << ": recieved key: " << key << endl;
+      cout << appName() << ": recieved key: " << key << endl;
 
-    const lock_guard<mutex> lock(mu_);
-    if (dict_.find(key) == dict_.end()) {
-      cerr << "unknown key '" << key << "', discarded" << endl;
-      return;
-    }
+      const lock_guard<mutex> lock(mu_);
+      if (dict_.find(key) == dict_.end()) {
+        cerr << "unknown key '" << key << "', discarded" << endl;
+        return;
+      }
 
-    dict_[key] = value;
+      dict_[key] = value;
+    }).detach();
   };
 
   return sh;
