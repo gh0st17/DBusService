@@ -1,4 +1,5 @@
 #include <string.h>
+
 #include <iostream>
 
 using namespace std;
@@ -20,12 +21,13 @@ void parse_params(const int argc, const char* argv[]) {
   }
 
   if (p.configsPaths.size() == 0) {
-    throw invalid_argument("input directory missing or doesn't contains any json file");
+    throw invalid_argument(
+      "input directory missing or doesn't contains any json file");
   }
 }
 
 vector<fs::path> getJsonFiles(const char* directory) {
-  if (!fs::is_directory(directory)){
+  if (!fs::is_directory(directory)) {
     throw invalid_argument("input path is not directory or unexist");
   }
 

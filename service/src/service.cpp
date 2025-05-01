@@ -19,10 +19,11 @@ DBusService::DBusService(vector<fs::path>&& configsPaths) {
 }
 
 void DBusService::initInstance(const fs::path& configPath) {
-  ConnParams cp{.conn = *(conn_),
-                .interfaceName = interfaceName_,
-                .signalName = signalName_,
-                .objectPath = sdbus::ObjectPath(objectPath_ + "Application/")};
+  const static shared_ptr<ConnParams> cp = make_shared<ConnParams>(
+    ConnParams{.conn = *(conn_),
+               .interfaceName = interfaceName_,
+               .signalName = signalName_,
+               .objectPath = sdbus::ObjectPath(objectPath_ + "Application/")});
 
   auto instance = make_unique<AppInstance>(configPath, cp);
 

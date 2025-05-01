@@ -5,13 +5,12 @@
 
 #include "generic/generic.hpp"
 
-ConfManagerApplication::ConfManagerApplication(const fs::path& configPath) {
-  configPath_ = configPath;
+ConfManagerApplication::ConfManagerApplication(const fs::path& configPath)
+    : configPath_(configPath) {
   readConfig();
+
   const string appName = configPath_.stem().string();
-
   conn_ = sdbus::createSessionBusConnection();
-
   proxy_ = sdbus::createProxy(*conn_, serviceName_,
                               sdbus::ObjectPath(objectPath_ + appName));
   proxy_->registerSignalHandler(interfaceName_, signalName_, signalCallback());

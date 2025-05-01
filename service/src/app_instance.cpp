@@ -10,18 +10,17 @@
 
 namespace fs = std::filesystem;
 
-AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
-  configPath_ = configPath;
+AppInstance::AppInstance(const fs::path& configPath,
+                         const shared_ptr<ConnParams> cp)
+    : cp_(cp), configPath_(configPath) {
   readConfig();
 
-  cp_ = make_unique<ConnParams>(cp);
   const string appName = configPath.stem().string();
-
   cout << "Creating configuration listener instance for " << appName << endl;
   cout << "Configuration path is '" << configPath.string() << "'" << endl;
 
   object_ =
-    sdbus::createObject(cp.conn, sdbus::ObjectPath(cp.objectPath + appName));
+    sdbus::createObject(cp->conn, sdbus::ObjectPath(cp->objectPath + appName));
 
   object_
     ->addVTable(
@@ -40,7 +39,7 @@ AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
                               getConfigCallback(),
                               {}},
       sdbus::SignalVTableItem{cp_->signalName, sdbus::Signature{"sv"}, {}, {}})
-    .forInterface(cp.interfaceName);
+    .forInterface(cp->interfaceName);
 }
 
 void AppInstance::writeConfig() {
@@ -88,34 +87,35 @@ sdbus::method_callback AppInstance::setConfigCallback() {
       sdbus::Variant value;
       call >> key >> value;
       auto reply = call.createReply();
-    
+
       auto handleError = [&](const string& message) {
+        const auto errName = sdbus::Error::Name(cp_->interfaceName + ".Error");
         cerr << message << endl;
-        reply << message;
+        reply = call.createErrorReply({errName, message});
         reply.send();
       };
-    
+
       lock_guard<mutex> lock(mu_);
       if (!isKeyExists(key)) {
         handleError("unknown key '" + key + "', discarded");
         return;
       }
-    
+
       if (!isTypeMatches(key, value)) {
-        auto errString = "invalid type of key '" + key + 
-          "', expected '" + dict_[key].peekValueType() + "'";
+        auto errString = "invalid type of key '" + key + "', expected '" +
+                         dict_[key].peekValueType() + "'";
         handleError(errString);
         return;
       }
-    
+
       dict_[key] = value;
-    
+
       if (!writeConfigSafely(handleError))
         return;
-    
+
       if (!emitConfigChangedSignal(key, handleError))
         return;
-    
+
       reply << "Key '" + key + "' was set";
       reply.send();
     }).detach();
@@ -126,7 +126,8 @@ bool AppInstance::isKeyExists(const string& key) const {
   return dict_.find(key) != dict_.end();
 }
 
-bool AppInstance::isTypeMatches(const string& key, const sdbus::Variant& value) const {
+bool AppInstance::isTypeMatches(const string& key,
+                                const sdbus::Variant& value) const {
   return strcmp(dict_.at(key).peekValueType(), value.peekValueType()) == 0;
 }
 
@@ -144,7 +145,8 @@ bool AppInstance::writeConfigSafely(ErrFunc handleError) {
   return false;
 }
 
-bool AppInstance::emitConfigChangedSignal(const string& key, ErrFunc handleError) {
+bool AppInstance::emitConfigChangedSignal(const string& key,
+                                          ErrFunc handleError) {
   try {
     auto signal = object_->createSignal(cp_->interfaceName, cp_->signalName);
     signal << key << dict_[key];

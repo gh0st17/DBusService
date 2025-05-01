@@ -26,7 +26,7 @@ struct ConnParams {
 class AppInstance {
  private:
   unique_ptr<sdbus::IObject> object_;
-  unique_ptr<ConnParams> cp_;
+  shared_ptr<ConnParams> cp_;
   fs::path configPath_;
   config dict_;
   mutex mu_;
@@ -53,13 +53,13 @@ class AppInstance {
   /// @param value Проверяемое значение
   /// @return `true` если типы совпадают, иначе - `false`
   bool isTypeMatches(const string& key, const sdbus::Variant& value) const;
-  
+
   /// @brief Выполняет сохранение конфигурации в файл
   ///        с обработкой возможных ошибок
   /// @param handleError Функция обработки сообщения об ошибке
   /// @return `true` если запись в файл успешна, иначе - `false`
   bool writeConfigSafely(ErrFunc handleError);
-  
+
   /// @brief Излучает сигнал об изменении конфигурации для
   ///        соответсвующего приложения
   /// @param key Ключ, новое значение которого нужно передать по шине `DBus`
@@ -76,5 +76,5 @@ class AppInstance {
   void writeConfig();
 
  public:
-  AppInstance(const fs::path& configPath, const ConnParams& cp);
+  AppInstance(const fs::path& configPath, const shared_ptr<ConnParams> cp);
 };
