@@ -89,7 +89,8 @@ sdbus::method_callback AppInstance::setConfigCallback() {
       auto reply = call.createReply();
 
       auto handleError = [&](const string& message) {
-        const auto errName = sdbus::Error::Name(cp_->interfaceName + ".Error");
+        const auto errName =
+          sdbus::Error::Name(cp_->interfaceName + "." + call.getMemberName());
         cerr << message << endl;
         reply = call.createErrorReply({errName, message});
         reply.send();
