@@ -25,6 +25,8 @@ int main(const int argc, const char* argv[]) {
     cerr << "json error: " << e.what() << endl;
   } catch (const sdbus::Error& e) {
     cerr << "sdbus error: " << e.what() << endl;
+  } catch (const std::invalid_argument& e) {
+    cerr << "invalid_argument error: " << e.what() << endl;
   } catch (const std::exception& e) {
     cerr << "unknown error: " << e.what() << endl;
   }

@@ -4,9 +4,7 @@
 
 #include <filesystem>
 #include <fstream>
-#include <functional>
 #include <iostream>
-#include <sstream>
 
 #include "generic/generic.hpp"
 
@@ -41,7 +39,7 @@ AppInstance::AppInstance(const fs::path& configPath, const ConnParams& cp) {
                               {},
                               getConfigCallback(),
                               {}},
-      sdbus::SignalVTableItem{signalName_, sdbus::Signature{"sv"}, {}, {}})
+      sdbus::SignalVTableItem{cp_->signalName, sdbus::Signature{"sv"}, {}, {}})
     .forInterface(cp.interfaceName);
 }
 
@@ -73,8 +71,8 @@ void AppInstance::readConfig() {
 }
 
 sdbus::method_callback AppInstance::getConfigCallback() {
-  return [this](sdbus::MethodCall call) {
-    thread([this, call = std::move(call)]() mutable {
+  return [this](const sdbus::MethodCall call) {
+    thread([this, call = std::move(call)]() {
       auto reply = call.createReply();
       lock_guard<mutex> lock(this->mu_);
       reply << dict_;
@@ -88,64 +86,74 @@ sdbus::method_callback AppInstance::setConfigCallback() {
     thread([this, call = std::move(call)]() mutable {
       string key;
       sdbus::Variant value;
-
       call >> key >> value;
       auto reply = call.createReply();
-      stringstream ss;
-
+    
       auto handleError = [&](const string& message) {
         cerr << message << endl;
         reply << message;
         reply.send();
       };
-
-      lock_guard<mutex> lock(this->mu_);
-      if (dict_.find(key) == dict_.end()) {
-        ss << "unknown key '" << key << "', discarded";
-        handleError(ss.str());
+    
+      lock_guard<mutex> lock(mu_);
+      if (!isKeyExists(key)) {
+        handleError("unknown key '" + key + "', discarded");
         return;
       }
-
-      if (!strcmp(dict_[key].peekValueType(), value.peekValueType())) {
-        dict_[key] = value;
-      } else {
-        ss << "invalid type of key '" << key << "', expected '"
-           << dict_[key].peekValueType() << "'";
-        handleError(ss.str());
+    
+      if (!isTypeMatches(key, value)) {
+        auto errString = "invalid type of key '" + key + 
+          "', expected '" + dict_[key].peekValueType() + "'";
+        handleError(errString);
         return;
       }
-
-      try {
-        writeConfig();
-      } catch (const fs::filesystem_error& e) {
-        ss << "filesystem error while writing conf: " << e.what();
-        handleError(ss.str());
+    
+      dict_[key] = value;
+    
+      if (!writeConfigSafely(handleError))
         return;
-      } catch (const Json::Exception& e) {
-        ss << "json error while writing conf: " << e.what();
-        handleError(ss.str());
+    
+      if (!emitConfigChangedSignal(key, handleError))
         return;
-      } catch (const std::exception& e) {
-        cerr << "unknown error while writing conf: " << e.what();
-        handleError(ss.str());
-        return;
-      }
-
-      try {
-        reply << string{"Key '" + key + "' was set"};
-        reply.send();
-
-        auto signal =
-          object_->createSignal(cp_->interfaceName, cp_->signalName);
-        signal << key << dict_[key];
-        object_->emitSignal(signal);
-      } catch (const sdbus::Error& e) {
-        ss << "sdbus error while signaling: " << e.what();
-        handleError(ss.str());
-      } catch (const std::exception& e) {
-        ss << "unknown error while signaling: " << e.what();
-        handleError(ss.str());
-      }
+    
+      reply << "Key '" + key + "' was set";
+      reply.send();
     }).detach();
   };
+}
+
+bool AppInstance::isKeyExists(const string& key) const {
+  return dict_.find(key) != dict_.end();
+}
+
+bool AppInstance::isTypeMatches(const string& key, const sdbus::Variant& value) const {
+  return strcmp(dict_.at(key).peekValueType(), value.peekValueType()) == 0;
+}
+
+bool AppInstance::writeConfigSafely(ErrFunc handleError) {
+  try {
+    writeConfig();
+    return true;
+  } catch (const fs::filesystem_error& e) {
+    handleError("filesystem error: " + string(e.what()));
+  } catch (const Json::Exception& e) {
+    handleError("json error: " + string(e.what()));
+  } catch (const std::exception& e) {
+    handleError("unknown error: " + string(e.what()));
+  }
+  return false;
+}
+
+bool AppInstance::emitConfigChangedSignal(const string& key, ErrFunc handleError) {
+  try {
+    auto signal = object_->createSignal(cp_->interfaceName, cp_->signalName);
+    signal << key << dict_[key];
+    object_->emitSignal(signal);
+    return true;
+  } catch (const sdbus::Error& e) {
+    handleError("sdbus error: " + string(e.what()));
+  } catch (const std::exception& e) {
+    handleError("unknown signal error: " + string(e.what()));
+  }
+  return false;
 }

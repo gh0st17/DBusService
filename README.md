@@ -27,7 +27,7 @@ apt install -y cmake build-essential libjsoncpp-dev libjsoncpp25 python3-pkgconf
 
 1. Загрузите этот репозитории на диск любым из предложенных способов:
   - Загрузите как архив и распакуйте, откройте распакованную директорию в окне терминала;
-  - Используйте утилиту `git`, в окне терминала выполните.
+  - Используйте утилиту `git`, в окне терминала выполните:
 
 ```bash
 git clone https://github.com/gh0st17/DBusService.git
@@ -51,7 +51,7 @@ cmake --build build
 
 Параметр `-p` служит для указания пути к директории с файлами конфигурации приложении.
 
-2. После успешного запуска в окне терминала будет строка
+2. После успешного запуска в окне терминала будет строка:
 
 ```
 Entering into event loop
@@ -71,15 +71,15 @@ Entering into event loop
 
 ```bash
 gdbus call --session --dest com.system.configurationManager \
-	--object-path /com/system/configurationManager/Application/confManagerApplication1 \
-	--method com.system.configurationManager.Application.Configuration.ChangeConfiguration \
- 	"TimeoutPhrase" "<'STOP'>"
+  --object-path /com/system/configurationManager/Application/confManagerApplication1 \
+  --method com.system.configurationManager.Application.Configuration.ChangeConfiguration \
+  "TimeoutPhrase" "<'STOP'>"
 ```
 
-5. Появится результат вызова метода `ChangeConfiguration`
+5. Появится результат вызова метода `ChangeConfiguration`:
 
 ```
 ("Key 'TimeoutPhrase' was set",)
 ```
 
-При этом в окне с клиентской частью приложение с именем `confManagerApplication1` обновит значение ключа `TimeoutPhrase` на значение равное `STOP`
+При этом в окне с клиентской частью приложение с именем `confManagerApplication1` обновит значение ключа `TimeoutPhrase` на значение равное `STOP`.
