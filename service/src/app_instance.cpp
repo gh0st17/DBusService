@@ -10,10 +10,13 @@
 AppInstance::AppInstance(const fs::path& configPath,
                          const shared_ptr<ConnParams> cp)
     : cp_(cp), configPath_(configPath), appName_(configPath.stem().string()) {
+
+      log.info() << "Read config '" + configPath.string() + "'";
   readConfig();
 
   log.info() << "Creating configuration listener instance for " + appName_;
-  log.info() << "Configuration path is '" + configPath.string() + "'\n";
+  log.info() << "Configuration path is '" + configPath.string() + "'";
+  generic::printConfig(dict_, appName_);
 
   object_ =
     sdbus::createObject(cp->conn, sdbus::ObjectPath(cp->objectPath + appName_));

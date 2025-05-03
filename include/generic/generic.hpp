@@ -15,7 +15,18 @@ namespace generic {
 
 /// @brief Читает конфигурацию из файла по пути
 ///        `configPath` в `dict`
-/// @param dict
-/// @param configPath
+/// @param dict Словарь с ключами конфигурации
+/// @param configPath Путь до файла с конфигурацией
 void readConfig(map<string, sdbus::Variant>& dict, const fs::path& configPath);
+
+/// @brief Преобразует значение `sdbus::Variant` конфигурации
+///        в строку в рамках заведомо известного набора типов
+/// @param value Значение типа `sdbus::Variant`
+/// @return Значение в строковом представлении
+const string stringValue(const sdbus::Variant& value);
+
+/// @brief Печатает конфигурацию приложения
+/// @param dict Словарь с ключами конфигурации
+/// @param appName Имя приложения для отображения
+void printConfig(const map<string, sdbus::Variant>& dict, const string& appName);
 }  // namespace generic

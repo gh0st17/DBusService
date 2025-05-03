@@ -8,6 +8,7 @@
 ConfManagerApplication::ConfManagerApplication(const fs::path& configPath)
     : configPath_(configPath), appName_(configPath.stem().string()) {
   readConfig();
+  generic::printConfig(dict_, appName_);
 
   conn_ = sdbus::createSessionBusConnection();
   proxy_ = sdbus::createProxy(*conn_, serviceName_,
@@ -69,8 +70,4 @@ const optional<uint> ConfManagerApplication::timeout() {
   }
 
   return {};
-}
-
-const string& ConfManagerApplication::appName() const {
-  return appName_;
 }

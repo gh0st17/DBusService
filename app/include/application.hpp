@@ -80,8 +80,4 @@ class ConfManagerApplication {
   /// @brief Возвращает значение `Timeout`
   /// @return `Timeout`
   const optional<uint> timeout();
-
-  /// @brief Возвращает имя приложения
-  /// @return Имя приложения
-  const string& appName() const;
 };
