@@ -51,4 +51,13 @@ void printConfig(const map<string, sdbus::Variant>& dict,
     throw std::runtime_error(appName + ": empty configuration file");
   }
 }
+
+atomic<bool> stop = false;
+
+void signalHandler(int signal) {
+  if (signal == SIGINT) {
+      Logger::getInstance().info() << "Ctrl+C received";
+      stop.store(true);
+  }
+}
 }  // namespace generic

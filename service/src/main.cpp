@@ -1,15 +1,33 @@
 #include <iostream>
+#include <thread>
+#include <csignal>
 
 #include "generic/params.hpp"
+#include "generic/generic.hpp"
 #include "service.hpp"
 
 using namespace std;
 
 int main(const int argc, const char* argv[]) {
   try {
+    signal(SIGINT, generic::signalHandler);
     parse_params(argc, argv);
 
-    DBusService(std::move(p.configsPaths)).startService();
+    auto service = make_shared<DBusService>(std::move(p.configsPaths));
+
+    thread stopThread([&]() {
+        while (!generic::stop.load()) {
+            this_thread::sleep_for(chrono::seconds(1));
+        }
+        service->stop();
+    });
+
+    thread startThread([&]() {
+        service->start();
+    });
+
+    startThread.join();
+    stopThread.join();
 
   } catch (const fs::filesystem_error& e) {
     cerr << "filesystem error: " << e.what() << endl;

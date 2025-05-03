@@ -4,6 +4,8 @@
 #include <filesystem>
 #include <fstream>
 #include <map>
+#include <csignal>
+#include <atomic>
 
 #include "sdbus-c++/sdbus-c++.h"
 
@@ -30,4 +32,11 @@ const string stringValue(const sdbus::Variant& value);
 /// @param appName Имя приложения для отображения
 void printConfig(const map<string, sdbus::Variant>& dict,
                  const string& appName);
+
+/// @brief Флаг остановки программы
+extern atomic<bool> stop;
+
+/// @brief Обработчик сигналов
+/// @param signal Код сигнала
+void signalHandler(int signal);
 }  // namespace generic

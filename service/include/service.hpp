@@ -34,5 +34,8 @@ class DBusService {
   DBusService(vector<fs::path>&& configsPaths);
 
   /// @brief Запускает сервис
-  void startService();
+  void start();
+
+  /// @brief Останавливает сервис
+  void stop();
 };

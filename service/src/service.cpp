@@ -29,7 +29,13 @@ void DBusService::initInstance(const fs::path& configPath) {
   instances_.push_back(std::move(instance));
 }
 
-void DBusService::startService() {
+void DBusService::start() {
   Logger::getInstance().info() << "Entering into event loop";
   conn_->enterEventLoop();
+}
+
+void DBusService::stop() {
+  Logger::getInstance().info() << "Leaving event loop";
+  instances_.clear();
+  conn_->leaveEventLoop();
 }

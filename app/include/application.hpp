@@ -76,6 +76,9 @@ class ConfManagerApplication {
   /// @brief Запускает прослушивание событии
   void start();
 
+  /// @brief Останавливает прослушивание событии
+  void stop();
+
   /// @brief Печатает `TimeoutPhrase`
   void printTimeoutPhrase();
 

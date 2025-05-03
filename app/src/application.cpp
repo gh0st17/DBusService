@@ -22,11 +22,11 @@ sdbus::signal_handler ConfManagerApplication::signalCallback() {
       sdbus::Variant value;
       signal >> key >> value;
 
-      logger_.info() << appName_ + ": recieved key: " + key;
+      logger_.info() << appName_ << ": recieved key: " << key << " with value " << generic::stringValue(value);
 
       const lock_guard<mutex> lock(mu_);
       if (dict_.find(key) == dict_.end()) {
-        logger_.error() << "unknown key '" + key + "', discarded";
+        logger_.error() << "unknown key '" << key << "', discarded";
         return;
       }
 
@@ -41,19 +41,25 @@ void ConfManagerApplication::readConfig() {
 }
 
 void ConfManagerApplication::start() {
+  logger_.info() << appName_ << ": Entering into event loop";
   conn_->enterEventLoopAsync();
+}
+
+void ConfManagerApplication::stop() {
+  logger_.info() << appName_ << ": Leaving event loop";
+  conn_->leaveEventLoop();
 }
 
 void ConfManagerApplication::printTimeoutPhrase() {
   const lock_guard<mutex> lock(mu_);
 
   if (dict_.find("TimeoutPhrase") == dict_.end()) {
-    logger_.info() << appName_ + ": TimeoutPhrase: <key unset>";
+    logger_.info() << appName_ << ": TimeoutPhrase: <key unset>";
   } else if (dict_["TimeoutPhrase"].containsValueOfType<string>()) {
     string value = dict_["TimeoutPhrase"].get<string>();
-    logger_.info() << appName_ + ": TimeoutPhrase: '" + value + "'";
+    logger_.info() << appName_ << ": TimeoutPhrase: '" << value << "'";
   } else {
-    logger_.warning() << appName_ + ": TimeoutPhrase is not string type";
+    logger_.warning() << appName_ << ": TimeoutPhrase is not string type";
   }
 }
 
@@ -61,11 +67,11 @@ const optional<uint> ConfManagerApplication::timeout() {
   const lock_guard<mutex> lock(mu_);
 
   if (dict_.find("Timeout") == dict_.end()) {
-    logger_.info() << appName_ + ": <Timeout unset>";
+    logger_.info() << appName_ << ": <Timeout unset>";
   } else if (dict_["Timeout"].containsValueOfType<uint>()) {
     return dict_["Timeout"].get<uint>();
   } else {
-    logger_.warning() << appName_ + ": Timeout is not uint type";
+    logger_.warning() << appName_ << ": Timeout is not uint type";
   }
 
   return {};

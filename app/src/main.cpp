@@ -2,16 +2,21 @@
 #include <list>
 #include <memory>
 #include <thread>
+#include <csignal>
 
 #include "application.hpp"
 #include "generic/params.hpp"
+#include "generic/generic.hpp"
 
 using namespace std;
 
+/// @brief Обработчик приложении
+/// @param configsPaths Массив путей к конфигурациям приложении
 void handleApplications(const vector<fs::path>&);
 
 int main(const int argc, const char* argv[]) {
   try {
+    signal(SIGINT, generic::signalHandler);
     parse_params(argc, argv);
 
     handleApplications(p.configsPaths);
@@ -32,8 +37,6 @@ int main(const int argc, const char* argv[]) {
   }
 }
 
-/// @brief Обработчик приложении
-/// @param configsPaths Массив путей к конфигурациям приложении
 void handleApplications(const vector<fs::path>& configsPaths) {
   mutex mu;
   vector<thread> threads;
@@ -56,6 +59,10 @@ void handleApplications(const vector<fs::path>& configsPaths) {
         {
           const lock_guard<mutex> lock(mu);
           cma->printTimeoutPhrase();
+        }
+        if (generic::stop.load()) {
+          cma->stop();
+          break;
         }
       }
     }));
