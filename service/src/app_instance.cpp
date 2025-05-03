@@ -2,25 +2,21 @@
 
 #include <json/json.h>
 
-#include <filesystem>
 #include <fstream>
-#include <iostream>
 
 #include "generic/generic.hpp"
-
-namespace fs = std::filesystem;
+#include "generic/logger.hpp"
 
 AppInstance::AppInstance(const fs::path& configPath,
                          const shared_ptr<ConnParams> cp)
-    : cp_(cp), configPath_(configPath) {
+    : cp_(cp), configPath_(configPath), appName_(configPath.stem().string()) {
   readConfig();
 
-  const string appName = configPath.stem().string();
-  cout << "Creating configuration listener instance for " << appName << endl;
-  cout << "Configuration path is '" << configPath.string() << "'" << endl;
+  log.info() << "Creating configuration listener instance for " + appName_;
+  log.info() << "Configuration path is '" + configPath.string() + "'\n";
 
   object_ =
-    sdbus::createObject(cp->conn, sdbus::ObjectPath(cp->objectPath + appName));
+    sdbus::createObject(cp->conn, sdbus::ObjectPath(cp->objectPath + appName_));
 
   object_
     ->addVTable(
@@ -56,7 +52,7 @@ void AppInstance::writeConfig() {
     } else if (value.containsValueOfType<uint>()) {
       root[key] = value.get<uint>();
     } else {
-      cerr << "unknown type: " << key << endl;
+      log.error() << "unknown type: " + key;
     }
   }
   ofs << root;
@@ -91,7 +87,7 @@ sdbus::method_callback AppInstance::setConfigCallback() {
       auto handleError = [&](const string& message) {
         const auto errName =
           sdbus::Error::Name(cp_->interfaceName + "." + call.getMemberName());
-        cerr << message << endl;
+        log.error() << appName_ + ": " + message;
         reply = call.createErrorReply({errName, message});
         reply.send();
       };
@@ -117,6 +113,7 @@ sdbus::method_callback AppInstance::setConfigCallback() {
       if (!emitConfigChangedSignal(key, handleError))
         return;
 
+      log.info() << appName_ + ": Key '" + key + "' was set";
       reply << "Key '" + key + "' was set";
       reply.send();
     }).detach();

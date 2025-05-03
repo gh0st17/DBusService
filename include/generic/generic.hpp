@@ -3,7 +3,6 @@
 
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 #include <map>
 
 #include "sdbus-c++/sdbus-c++.h"

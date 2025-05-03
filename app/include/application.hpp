@@ -21,6 +21,7 @@ class ConfManagerApplication {
   unique_ptr<sdbus::IConnection> conn_;
   unique_ptr<sdbus::IProxy> proxy_;
   fs::path configPath_;
+  string appName_;
   config dict_;
   mutex mu_;
 
@@ -82,5 +83,5 @@ class ConfManagerApplication {
 
   /// @brief Возвращает имя приложения
   /// @return Имя приложения
-  const string appName() const;
+  const string& appName() const;
 };

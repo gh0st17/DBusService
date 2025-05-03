@@ -2,7 +2,8 @@
 
 #include <filesystem>
 #include <fstream>
-#include <iostream>
+
+#include "generic/logger.hpp"
 
 namespace fs = std::filesystem;
 
@@ -12,7 +13,7 @@ DBusService::DBusService(vector<fs::path>&& configsPaths) {
   conn_->requestName(sdbus::ServiceName(serviceName_));
 
   for (const auto& path : configsPaths) {
-    cout << "Read config '" << path.string() << "'" << endl;
+    log.info() << "Read config '" + path.string() + "'";
 
     initInstance(path);
   }
@@ -31,6 +32,6 @@ void DBusService::initInstance(const fs::path& configPath) {
 }
 
 void DBusService::startService() {
-  cout << "Entering into event loop\n";
+  log.info() << "Entering into event loop";
   conn_->enterEventLoop();
 }

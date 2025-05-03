@@ -53,15 +53,15 @@ cmake --build build
 
 2. После успешного запуска в окне терминала будет строка:
 
-```
-Entering into event loop
+```bash
+[INFO] Entering into event loop
 ```
 
 означающая, что сервер готов обмениваться сообщениями по сессионной шине `DBus`.
 
 3. В другом окне терминала из текущей директории запустите клиентскую часть командой:
 
-```
+```bash
 ./build/app/confManagerApplication -p configs
 ```
 

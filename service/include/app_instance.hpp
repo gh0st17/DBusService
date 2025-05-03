@@ -28,6 +28,7 @@ class AppInstance {
   unique_ptr<sdbus::IObject> object_;
   shared_ptr<ConnParams> cp_;
   fs::path configPath_;
+  string appName_;
   config dict_;
   mutex mu_;
 

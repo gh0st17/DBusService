@@ -1,5 +1,7 @@
 #include "generic/generic.hpp"
 
+#include "generic/logger.hpp"
+
 namespace generic {
 
 void readConfig(map<string, sdbus::Variant>& dict, const fs::path& configPath) {
@@ -14,14 +16,14 @@ void readConfig(map<string, sdbus::Variant>& dict, const fs::path& configPath) {
   for (const auto& key : root.getMemberNames()) {
     const Json::Value& val = root[key];
 
-    cout << key << ": " << val.asString() << endl;
+    log.info() << key + ": " + val.asString();
 
     if (val.isString()) {
       dict[key] = sdbus::Variant(val.asString());
     } else if (val.isUInt()) {
       dict[key] = sdbus::Variant(static_cast<uint>(val.asUInt()));
     } else {
-      cerr << "unknown type: " << key << std::endl;
+      log.error() << "unknown type: " + key;
     }
   }
 
