@@ -28,5 +28,6 @@ const string stringValue(const sdbus::Variant& value);
 /// @brief Печатает конфигурацию приложения
 /// @param dict Словарь с ключами конфигурации
 /// @param appName Имя приложения для отображения
-void printConfig(const map<string, sdbus::Variant>& dict, const string& appName);
+void printConfig(const map<string, sdbus::Variant>& dict,
+                 const string& appName);
 }  // namespace generic

@@ -21,7 +21,7 @@ void readConfig(map<string, sdbus::Variant>& dict, const fs::path& configPath) {
     } else if (val.isUInt()) {
       dict[key] = sdbus::Variant(static_cast<uint>(val.asUInt()));
     } else {
-      log.error() << "readConfig: unknown type: " + key;
+      logger.error() << "readConfig: unknown type: " + key;
     }
   }
 
@@ -38,9 +38,10 @@ const string stringValue(const sdbus::Variant& value) {
   }
 }
 
-void printConfig(const map<string, sdbus::Variant>& dict, const string& appName) {
+void printConfig(const map<string, sdbus::Variant>& dict,
+                 const string& appName) {
   if (dict.size() > 0) {
-    auto info = log.info();
+    auto info = logger.info();
     info << appName + ": config: \n";
 
     for (const auto& [key, value] : dict) {

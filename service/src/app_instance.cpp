@@ -10,12 +10,11 @@
 AppInstance::AppInstance(const fs::path& configPath,
                          const shared_ptr<ConnParams> cp)
     : cp_(cp), configPath_(configPath), appName_(configPath.stem().string()) {
-
-      log.info() << "Read config '" + configPath.string() + "'";
+  logger.info() << "Read config '" + configPath.string() + "'";
   readConfig();
 
-  log.info() << "Creating configuration listener instance for " + appName_;
-  log.info() << "Configuration path is '" + configPath.string() + "'";
+  logger.info() << "Creating configuration listener instance for " + appName_;
+  logger.info() << "Configuration path is '" + configPath.string() + "'";
   generic::printConfig(dict_, appName_);
 
   object_ =
@@ -55,7 +54,7 @@ void AppInstance::writeConfig() {
     } else if (value.containsValueOfType<uint>()) {
       root[key] = value.get<uint>();
     } else {
-      log.error() << "unknown type: " + key;
+      logger.error() << "unknown type: " + key;
     }
   }
   ofs << root;
@@ -90,7 +89,7 @@ sdbus::method_callback AppInstance::setConfigCallback() {
       auto handleError = [&](const string& message) {
         const auto errName =
           sdbus::Error::Name(cp_->interfaceName + "." + call.getMemberName());
-        log.error() << appName_ + ": " + message;
+        logger.error() << appName_ + ": " + message;
         reply = call.createErrorReply({errName, message});
         reply.send();
       };
@@ -116,7 +115,7 @@ sdbus::method_callback AppInstance::setConfigCallback() {
       if (!emitConfigChangedSignal(key, handleError))
         return;
 
-      log.info() << appName_ + ": Key '" + key + "' was set";
+      logger.info() << appName_ + ": Key '" + key + "' was set";
       reply << "Key '" + key + "' was set";
       reply.send();
     }).detach();

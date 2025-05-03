@@ -46,4 +46,4 @@ Logger::LogStream Logger::error() {
   return LogStream(out_, mu_, Level::ERROR);
 }
 
-Logger log = Logger();
+Logger logger = Logger();

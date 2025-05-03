@@ -23,11 +23,11 @@ sdbus::signal_handler ConfManagerApplication::signalCallback() {
       sdbus::Variant value;
       signal >> key >> value;
 
-      log.info() << appName_ + ": recieved key: " + key;
+      logger.info() << appName_ + ": recieved key: " + key;
 
       const lock_guard<mutex> lock(mu_);
       if (dict_.find(key) == dict_.end()) {
-        log.error() << "unknown key '" + key + "', discarded";
+        logger.error() << "unknown key '" + key + "', discarded";
         return;
       }
 
@@ -49,12 +49,12 @@ void ConfManagerApplication::printTimeoutPhrase() {
   const lock_guard<mutex> lock(mu_);
 
   if (dict_.find("TimeoutPhrase") == dict_.end()) {
-    log.info() << appName_ + ": TimeoutPhrase: <key unset>";
+    logger.info() << appName_ + ": TimeoutPhrase: <key unset>";
   } else if (dict_["TimeoutPhrase"].containsValueOfType<string>()) {
     string value = dict_["TimeoutPhrase"].get<string>();
-    log.info() << appName_ + ": TimeoutPhrase: '" + value + "'";
+    logger.info() << appName_ + ": TimeoutPhrase: '" + value + "'";
   } else {
-    log.warning() << appName_ + ": TimeoutPhrase is not string type";
+    logger.warning() << appName_ + ": TimeoutPhrase is not string type";
   }
 }
 
@@ -62,11 +62,11 @@ const optional<uint> ConfManagerApplication::timeout() {
   const lock_guard<mutex> lock(mu_);
 
   if (dict_.find("Timeout") == dict_.end()) {
-    log.info() << appName_ + ": <Timeout unset>";
+    logger.info() << appName_ + ": <Timeout unset>";
   } else if (dict_["Timeout"].containsValueOfType<uint>()) {
     return dict_["Timeout"].get<uint>();
   } else {
-    log.warning() << appName_ + ": Timeout is not uint type";
+    logger.warning() << appName_ + ": Timeout is not uint type";
   }
 
   return {};

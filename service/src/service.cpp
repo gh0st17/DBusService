@@ -30,6 +30,6 @@ void DBusService::initInstance(const fs::path& configPath) {
 }
 
 void DBusService::startService() {
-  log.info() << "Entering into event loop";
+  logger.info() << "Entering into event loop";
   conn_->enterEventLoop();
 }

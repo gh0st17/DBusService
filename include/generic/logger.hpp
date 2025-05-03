@@ -52,4 +52,4 @@ class Logger {
 };
 
 /// @brief Экспорт глобальной переменной `Logger`
-extern Logger log;
+extern Logger logger;
