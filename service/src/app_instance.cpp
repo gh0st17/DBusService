@@ -114,8 +114,9 @@ sdbus::method_callback AppInstance::setConfigCallback() {
       if (!emitConfigChangedSignal(key, handleError))
         return;
 
-      logger_.info() << appName_ << ": Key '" << key << "' was set to " << generic::stringValue(value);
-      reply << "Key '" << key << "' was set to " << generic::stringValue(value);
+      logger_.info() << appName_ << ": Key '" << key << "' was set to "
+                     << generic::stringValue(value);
+      reply << "Key '" + key + "' was set to " + generic::stringValue(value);
       reply.send();
     }).detach();
   };

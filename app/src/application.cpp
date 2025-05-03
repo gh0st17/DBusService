@@ -22,7 +22,8 @@ sdbus::signal_handler ConfManagerApplication::signalCallback() {
       sdbus::Variant value;
       signal >> key >> value;
 
-      logger_.info() << appName_ << ": recieved key: " << key << " with value " << generic::stringValue(value);
+      logger_.info() << appName_ << ": recieved key: '" << key
+                     << "' with value " << generic::stringValue(value);
 
       const lock_guard<mutex> lock(mu_);
       if (dict_.find(key) == dict_.end()) {

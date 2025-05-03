@@ -56,8 +56,8 @@ atomic<bool> stop = false;
 
 void signalHandler(int signal) {
   if (signal == SIGINT) {
-      Logger::getInstance().info() << "Ctrl+C received";
-      stop.store(true);
+    Logger::getInstance().info() << "Ctrl+C received";
+    stop.store(true);
   }
 }
 }  // namespace generic

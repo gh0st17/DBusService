@@ -1,9 +1,9 @@
+#include <csignal>
 #include <iostream>
 #include <thread>
-#include <csignal>
 
-#include "generic/params.hpp"
 #include "generic/generic.hpp"
+#include "generic/params.hpp"
 #include "service.hpp"
 
 using namespace std;
@@ -16,15 +16,13 @@ int main(const int argc, const char* argv[]) {
     auto service = make_shared<DBusService>(std::move(p.configsPaths));
 
     thread stopThread([&]() {
-        while (!generic::stop.load()) {
-            this_thread::sleep_for(chrono::seconds(1));
-        }
-        service->stop();
+      while (!generic::stop.load()) {
+        this_thread::sleep_for(chrono::seconds(1));
+      }
+      service->stop();
     });
 
-    thread startThread([&]() {
-        service->start();
-    });
+    thread startThread([&]() { service->start(); });
 
     startThread.join();
     stopThread.join();

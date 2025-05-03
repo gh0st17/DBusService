@@ -1,12 +1,12 @@
+#include <csignal>
 #include <iostream>
 #include <list>
 #include <memory>
 #include <thread>
-#include <csignal>
 
 #include "application.hpp"
-#include "generic/params.hpp"
 #include "generic/generic.hpp"
+#include "generic/params.hpp"
 
 using namespace std;
 
