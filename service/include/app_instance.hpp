@@ -6,6 +6,7 @@
 #include <mutex>
 
 #include "sdbus-c++/sdbus-c++.h"
+#include "generic/logger.hpp"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -28,6 +29,7 @@ class AppInstance {
   unique_ptr<sdbus::IObject> object_;
   shared_ptr<ConnParams> cp_;
   fs::path configPath_;
+  Logger& logger_ = Logger::getInstance();
   string appName_;
   config dict_;
   mutex mu_;

@@ -25,13 +25,18 @@ Logger::LogStream::~LogStream() {
 const char* Logger::LogStream::levelToString(Level level) const {
   switch (level) {
     case Level::INFO:
-      return "INFO";
+      return "  INFO ";
     case Level::WARNING:
       return "WARNING";
     case Level::ERROR:
-      return "ERROR";
+      return " ERROR ";
   }
   return "UNKNOWN";
+}
+
+Logger& Logger::getInstance(ostream& out) {
+  static Logger instance(out);
+  return instance;
 }
 
 Logger::LogStream Logger::info() {
@@ -45,5 +50,3 @@ Logger::LogStream Logger::warning() {
 Logger::LogStream Logger::error() {
   return LogStream(out_, mu_, Level::ERROR);
 }
-
-Logger logger = Logger();

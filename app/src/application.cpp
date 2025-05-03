@@ -3,7 +3,6 @@
 #include <fstream>
 
 #include "generic/generic.hpp"
-#include "generic/logger.hpp"
 
 ConfManagerApplication::ConfManagerApplication(const fs::path& configPath)
     : configPath_(configPath), appName_(configPath.stem().string()) {
@@ -23,11 +22,11 @@ sdbus::signal_handler ConfManagerApplication::signalCallback() {
       sdbus::Variant value;
       signal >> key >> value;
 
-      logger.info() << appName_ + ": recieved key: " + key;
+      logger_.info() << appName_ + ": recieved key: " + key;
 
       const lock_guard<mutex> lock(mu_);
       if (dict_.find(key) == dict_.end()) {
-        logger.error() << "unknown key '" + key + "', discarded";
+        logger_.error() << "unknown key '" + key + "', discarded";
         return;
       }
 
@@ -49,12 +48,12 @@ void ConfManagerApplication::printTimeoutPhrase() {
   const lock_guard<mutex> lock(mu_);
 
   if (dict_.find("TimeoutPhrase") == dict_.end()) {
-    logger.info() << appName_ + ": TimeoutPhrase: <key unset>";
+    logger_.info() << appName_ + ": TimeoutPhrase: <key unset>";
   } else if (dict_["TimeoutPhrase"].containsValueOfType<string>()) {
     string value = dict_["TimeoutPhrase"].get<string>();
-    logger.info() << appName_ + ": TimeoutPhrase: '" + value + "'";
+    logger_.info() << appName_ + ": TimeoutPhrase: '" + value + "'";
   } else {
-    logger.warning() << appName_ + ": TimeoutPhrase is not string type";
+    logger_.warning() << appName_ + ": TimeoutPhrase is not string type";
   }
 }
 
@@ -62,11 +61,11 @@ const optional<uint> ConfManagerApplication::timeout() {
   const lock_guard<mutex> lock(mu_);
 
   if (dict_.find("Timeout") == dict_.end()) {
-    logger.info() << appName_ + ": <Timeout unset>";
+    logger_.info() << appName_ + ": <Timeout unset>";
   } else if (dict_["Timeout"].containsValueOfType<uint>()) {
     return dict_["Timeout"].get<uint>();
   } else {
-    logger.warning() << appName_ + ": Timeout is not uint type";
+    logger_.warning() << appName_ + ": Timeout is not uint type";
   }
 
   return {};

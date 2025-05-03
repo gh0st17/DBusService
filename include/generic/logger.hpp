@@ -14,6 +14,8 @@ class Logger {
 
   enum class Level { INFO, WARNING, ERROR };
 
+  Logger(ostream& out);
+
  public:
   class LogStream {
    private:
@@ -39,7 +41,10 @@ class Logger {
     ~LogStream();
   };
 
-  Logger(ostream& out = cout);
+  Logger(const Logger&) = delete;
+  Logger& operator=(const Logger&) = delete;
+
+  static Logger& getInstance(ostream& out = cout);
 
   /// @return Поток вывода с меткой `Level::INFO`
   LogStream info();
@@ -50,6 +55,3 @@ class Logger {
   /// @return Поток вывода с меткой `Level::ERROR`
   LogStream error();
 };
-
-/// @brief Экспорт глобальной переменной `Logger`
-extern Logger logger;

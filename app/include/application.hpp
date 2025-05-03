@@ -8,6 +8,7 @@
 #include <optional>
 
 #include "sdbus-c++/sdbus-c++.h"
+#include "generic/logger.hpp"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -21,6 +22,7 @@ class ConfManagerApplication {
   unique_ptr<sdbus::IConnection> conn_;
   unique_ptr<sdbus::IProxy> proxy_;
   fs::path configPath_;
+  Logger& logger_ = Logger::getInstance();
   string appName_;
   config dict_;
   mutex mu_;
