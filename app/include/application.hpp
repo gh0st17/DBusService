@@ -1,6 +1,7 @@
 #pragma once
 #include <json/json.h>
 
+#include <condition_variable>
 #include <filesystem>
 #include <map>
 #include <memory>
@@ -27,6 +28,10 @@ class ConfManagerApplication {
   config dict_;
   mutex mu_;
 
+  /// @brief Используется для чтения сигнала
+  ///        о завершении программы
+  condition_variable* cv_;
+
   const sdbus::ServiceName serviceName_{"com.system.configurationManager"};
   const sdbus::InterfaceName interfaceName_{sdbus::InterfaceName(
     static_cast<string>(serviceName_) + ".Application.Configuration")};
@@ -43,7 +48,7 @@ class ConfManagerApplication {
   sdbus::signal_handler signalCallback();
 
  public:
-  ConfManagerApplication(const fs::path& configPath);
+  ConfManagerApplication(const fs::path& configPath, condition_variable* cv);
 
   /*
    * Удаляем конструкторы копирования
@@ -79,10 +84,11 @@ class ConfManagerApplication {
   /// @brief Останавливает прослушивание событии
   void stop();
 
+  /// @brief Ожидает `Timeout`
+  /// @param lock Захваченная блокировка
+  /// @return `true` если произошло прерывание в течение `Timeout`
+  const bool waitTimeout(unique_lock<mutex>& lock) const;
+
   /// @brief Печатает `TimeoutPhrase`
   void printTimeoutPhrase();
-
-  /// @brief Возвращает значение `Timeout`
-  /// @return `Timeout`
-  const optional<uint> timeout();
 };

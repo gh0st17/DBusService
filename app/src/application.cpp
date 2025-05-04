@@ -1,11 +1,10 @@
 #include "application.hpp"
 
-#include <fstream>
-
 #include "generic/generic.hpp"
 
-ConfManagerApplication::ConfManagerApplication(const fs::path& configPath)
-    : configPath_(configPath), appName_(configPath.stem().string()) {
+ConfManagerApplication::ConfManagerApplication(const fs::path& configPath,
+                                               condition_variable* cv)
+    : configPath_(configPath), appName_(configPath.stem().string()), cv_(cv) {
   readConfig();
   generic::printConfig(dict_, appName_);
 
@@ -32,6 +31,7 @@ sdbus::signal_handler ConfManagerApplication::signalCallback() {
       }
 
       dict_[key] = value;
+      cv_->notify_all();
     }).detach();
   };
 }
@@ -51,6 +51,24 @@ void ConfManagerApplication::stop() {
   conn_->leaveEventLoop();
 }
 
+const bool ConfManagerApplication::waitTimeout(unique_lock<mutex>& lock) const {
+  uint timeout = 10, oldTimeout;
+
+  auto updateTimeout = [&]() {
+    if (dict_.at("Timeout").containsValueOfType<uint>()) {
+      timeout = dict_.at("Timeout").get<uint>();
+    }
+  };
+  updateTimeout();
+
+  oldTimeout = timeout;
+
+  return cv_->wait_for(lock, chrono::seconds(timeout), [&] {
+    updateTimeout();
+    return oldTimeout != timeout || generic::stop.load();
+  });
+}
+
 void ConfManagerApplication::printTimeoutPhrase() {
   const lock_guard<mutex> lock(mu_);
 
@@ -62,18 +80,4 @@ void ConfManagerApplication::printTimeoutPhrase() {
   } else {
     logger_.warning() << appName_ << ": TimeoutPhrase is not string type";
   }
-}
-
-const optional<uint> ConfManagerApplication::timeout() {
-  const lock_guard<mutex> lock(mu_);
-
-  if (dict_.find("Timeout") == dict_.end()) {
-    logger_.info() << appName_ << ": <Timeout unset>";
-  } else if (dict_["Timeout"].containsValueOfType<uint>()) {
-    return dict_["Timeout"].get<uint>();
-  } else {
-    logger_.warning() << appName_ << ": Timeout is not uint type";
-  }
-
-  return {};
 }

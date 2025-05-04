@@ -39,34 +39,33 @@ int main(const int argc, const char* argv[]) {
 
 void handleApplications(const vector<fs::path>& configsPaths) {
   mutex mu;
+  condition_variable cv;
   vector<thread> threads;
   threads.reserve(configsPaths.size());
 
-  list<unique_ptr<ConfManagerApplication>> apps;
+  list<shared_ptr<ConfManagerApplication> > apps;
   for (const auto& path : configsPaths) {
-    auto app = make_unique<ConfManagerApplication>(path);
-    apps.push_back(std::move(app));
+    auto app = make_shared<ConfManagerApplication>(path, &cv);
+    apps.push_back(app);
     apps.back()->start();
 
-    threads.push_back(thread([cma = apps.back().get(), &mu]() mutable {
-      uint timeout = 10;
-      while (true) {
-        auto timeoutOpt = cma->timeout();
-        if (timeoutOpt.has_value()) {
-          timeout = timeoutOpt.value();
-        }
-        this_thread::sleep_for(chrono::seconds(timeout));
-        {
-          const lock_guard<mutex> lock(mu);
-          cma->printTimeoutPhrase();
-        }
-        if (generic::stop.load()) {
-          cma->stop();
-          break;
+    threads.push_back(thread([app, &mu]() mutable {
+      unique_lock<mutex> lock(mu);
+      while (!generic::stop.load()) {
+        if (!app->waitTimeout(lock)) {
+          app->printTimeoutPhrase();
         }
       }
     }));
   }
+
+  thread([&]() {
+    while (!generic::stop.load()) {
+      this_thread::sleep_for(chrono::seconds(1));
+    }
+    for_each(apps.begin(), apps.end(), mem_fn(&ConfManagerApplication::stop));
+    cv.notify_all();
+  }).detach();
 
   for (auto& t : threads) {
     if (t.joinable()) {
