@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.10)
 project(confManagerApplication)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -11,6 +11,7 @@ set_target_properties(sdbus-c++ PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_SOURCE_DIR}/include/sdbus-c++"
 )
 
+find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(JSONCPP jsoncpp)
 link_libraries(${JSONCPP_LIBRARIES})
@@ -21,4 +22,4 @@ file(GLOB SRCS
 )
 
 add_executable(confManagerApplication ${SRCS})
-target_link_libraries(confManagerApplication PRIVATE sdbus-c++ ${JSONCPP_LIBRARIES})
+target_link_libraries(confManagerApplication PRIVATE sdbus-c++ ${JSONCPP_LIBRARIES} Threads::Threads)

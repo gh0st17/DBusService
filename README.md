@@ -13,15 +13,23 @@
 	- Репозитории содержит предкомпилированные файлы в директории `lib`
 - Библиотека `PkgConfig`
 
-## Установка необходимого ПО для сборки в `Ubuntu 22.04`
+## Установка необходимого ПО для сборки в `Ubuntu 20.04` или `Ubuntu 22.04`
 
 1. Откройте окно терминала
 2. Выполните от имени супер-пользователя следующую команду для установки пакетов:
 
+Для `Ubuntu 20.04`
+
+```bash
+apt install -y cmake build-essential libjsoncpp-dev libjsoncpp1 python3-pkgconfig libsystemd-dev
+```
+
+Для `Ubuntu 22.04`
+
 ```bash
 apt install -y cmake build-essential libjsoncpp-dev libjsoncpp25 python3-pkgconfig libsystemd-dev
 ```
-3. Можно перейти к следующему разделу.
+3. Можно перейти к разделу "Инструкция по сборке".
 
 ## Инструкция по сборке
 
@@ -54,7 +62,7 @@ cmake --build build
 2. После успешного запуска в окне терминала будет строка:
 
 ```bash
-[INFO] Entering into event loop
+[  INFO ] Entering into event loop
 ```
 
 означающая, что сервер готов обмениваться сообщениями по сессионной шине `DBus`.
@@ -79,7 +87,7 @@ gdbus call --session --dest com.system.configurationManager \
 5. Появится результат вызова метода `ChangeConfiguration`:
 
 ```
-("Key 'TimeoutPhrase' was set",)
+("Key 'TimeoutPhrase' was set to 'STOP!'",)
 ```
 
 При этом в окне с клиентской частью приложение с именем `confManagerApplication1` обновит значение ключа `TimeoutPhrase` на значение равное `STOP`.
