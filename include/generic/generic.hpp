@@ -34,12 +34,14 @@ const string stringValue(const sdbus::Variant& value);
 void printConfig(const map<string, sdbus::Variant>& dict,
                  const string& appName);
 
-/// @brief Псевдоним для функции внутри которой ожидается ошибка
+/// @brief Псевдоним для функции
 using Func = function<void()>;
 
 /// @brief Функция обработки сообщения об ошибке
 /// @param pred Предикат функции внутри которой ожидается ошибка
-const bool errorHandler(Func pred);
+/// @param fallback Предикат функции при возникновении ошибки
+/// @return `true` если ошибки не возникло, иначе - `false`
+const bool errorHandler(Func pred, Func fallback = nullptr);
 
 /// @brief Флаг остановки программы
 extern atomic<bool> stop;

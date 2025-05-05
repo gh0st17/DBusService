@@ -89,18 +89,21 @@ sdbus::method_callback AppInstance::setConfigCallback() {
 }
 
 void AppInstance::setConfigHandler(sdbus::MethodCall call) {
+  auto handleError = [&](const string& message, const bool logging = true) {
+    const auto errName =
+      sdbus::Error::Name(appName_ + "." + call.getMemberName());
+    if (logging) {
+      logger_.error() << appName_ << '.' << call.getMemberName()
+                      << ": " << message;
+    }
+    auto reply = call.createErrorReply({errName, message});
+    reply.send();
+  };
+
   generic::errorHandler([&]() mutable {
     string key;
     sdbus::Variant value;
     call >> key >> value;
-
-    auto handleError = [&](const string& message) {
-      const auto errName =
-        sdbus::Error::Name(cp_->interfaceName + "." + call.getMemberName());
-      logger_.error() << appName_ << ": " << message;
-      auto reply = call.createErrorReply({errName, message});
-      reply.send();
-    };
 
     lock_guard<mutex> lock(mu_);
     if (dict_.find(key) == dict_.end()) {  // Проверяем наличие ключа `key`
@@ -128,6 +131,8 @@ void AppInstance::setConfigHandler(sdbus::MethodCall call) {
     ss << appName_ << ": Key '" << key << "' was set to "
        << generic::stringValue(value);
     replyAnswer(call, ss.str());
+  }, [&]() {
+    handleError("error occured", false);
   });
 }
 

@@ -52,25 +52,29 @@ void printConfig(const map<string, sdbus::Variant>& dict,
   }
 }
 
-const bool errorHandler(Func pred) {
+const bool errorHandler(Func pred, Func fallback) {
   try {
     pred();
     return true;
   } catch (const fs::filesystem_error& e) {
-    Logger::getInstance().error() << "filesystem error: " << e.what() << endl;
+    Logger::getInstance().error() << "filesystem error: " << e.what();
   } catch (const std::bad_cast& e) {
-    Logger::getInstance().error() << "bad_cast error: " << e.what() << endl;
+    Logger::getInstance().error() << "bad_cast error: " << e.what();
   } catch (const std::bad_alloc& e) {
-    Logger::getInstance().error() << "bad_alloc error: " << e.what() << endl;
+    Logger::getInstance().error() << "bad_alloc error: " << e.what();
   } catch (const Json::Exception& e) {
-    Logger::getInstance().error() << "json error: " << e.what() << endl;
+    Logger::getInstance().error() << "json error: " << e.what();
   } catch (const sdbus::Error& e) {
-    Logger::getInstance().error() << "sdbus error: " << e.what() << endl;
+    Logger::getInstance().error() << "sdbus error: " << e.what();
   } catch (const std::invalid_argument& e) {
-    Logger::getInstance().error()
-      << "invalid_argument error: " << e.what() << endl;
+    Logger::getInstance().error() << "invalid_argument error: " << e.what();
   } catch (const std::exception& e) {
-    Logger::getInstance().error() << "unknown error: " << e.what() << endl;
+    Logger::getInstance().error() << "unknown error: " << e.what();
+  }
+  if (fallback != nullptr) {
+    generic::errorHandler([&]() {
+      fallback();
+    });
   }
   return false;
 }

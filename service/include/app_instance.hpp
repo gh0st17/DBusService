@@ -54,6 +54,9 @@ class AppInstance {
   const bool isTypeMatches(const string& key,
                            const sdbus::Variant& value) const;
 
+  /// @brief Возвращает ответ на вызов метода
+  /// @param call Объект вызова метода
+  /// @param message Сообщения для ответа метода `DBus`
   void replyAnswer(sdbus::MethodCall& call, const string& message);
 
   /// @brief Читает конфигурацию из файла
