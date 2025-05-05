@@ -38,37 +38,23 @@ class AppInstance {
   /// @return Функцию-обработчик
   sdbus::method_callback getConfigCallback();
 
-  /// @brief Определяет обработчик для метода `ChangeConfiguration`
+  /// @brief Оборачивает функцию `setConfigHandler` в обработчик ошибок
   /// @return Функцию-обработчик
   sdbus::method_callback setConfigCallback();
 
-  /// @brief Псевдоним для функции обработки сообщения об ошибке
-  using ErrFunc = const function<void(const string&)>&;
-
-  /// @brief Проверяет существование ключа в `dict_`
-  /// @param key Ключ для проверки
-  /// @return `true` если существует, иначе - `false`
-  bool isKeyExists(const string& key) const;
+  /// @brief Определяет обработчик для метода `ChangeConfiguration`
+  /// @param call Объект вызова метода
+  void setConfigHandler(sdbus::MethodCall call);
 
   /// @brief Проверяет совпадает ли тип нового значения
   //         `value` ключа `key` или нет
   /// @param key Ключ для проверки
   /// @param value Проверяемое значение
   /// @return `true` если типы совпадают, иначе - `false`
-  bool isTypeMatches(const string& key, const sdbus::Variant& value) const;
+  const bool isTypeMatches(const string& key,
+                           const sdbus::Variant& value) const;
 
-  /// @brief Выполняет сохранение конфигурации в файл
-  ///        с обработкой возможных ошибок
-  /// @param handleError Функция обработки сообщения об ошибке
-  /// @return `true` если запись в файл успешна, иначе - `false`
-  bool writeConfigSafely(ErrFunc handleError);
-
-  /// @brief Излучает сигнал об изменении конфигурации для
-  ///        соответсвующего приложения
-  /// @param key Ключ, новое значение которого нужно передать по шине `DBus`
-  /// @param handleError Функция обработки сообщения об ошибке
-  /// @return `true` если сигнал отправлен успешно, иначе - `false`
-  bool emitConfigChangedSignal(const string& key, ErrFunc handleError);
+  void replyAnswer(sdbus::MethodCall& call, const string& message);
 
   /// @brief Читает конфигурацию из файла
   ///        по пути `configPath_` в `dict_`

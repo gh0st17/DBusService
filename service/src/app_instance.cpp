@@ -3,6 +3,7 @@
 #include <json/json.h>
 
 #include <fstream>
+#include <sstream>
 
 #include "generic/generic.hpp"
 
@@ -69,93 +70,75 @@ void AppInstance::readConfig() {
 sdbus::method_callback AppInstance::getConfigCallback() {
   return [this](const sdbus::MethodCall call) {
     thread([this, call = std::move(call)]() {
-      auto reply = call.createReply();
-      lock_guard<mutex> lock(this->mu_);
-      reply << dict_;
-      reply.send();
+      generic::errorHandler([&]() {
+        auto reply = call.createReply();
+        lock_guard<mutex> lock(this->mu_);
+        reply << dict_;
+        reply.send();
+      });
     }).detach();
   };
 }
 
 sdbus::method_callback AppInstance::setConfigCallback() {
   return [this](sdbus::MethodCall call) {
-    thread([this, call = std::move(call)]() mutable {
-      string key;
-      sdbus::Variant value;
-      call >> key >> value;
-      auto reply = call.createReply();
-
-      auto handleError = [&](const string& message) {
-        const auto errName =
-          sdbus::Error::Name(cp_->interfaceName + "." + call.getMemberName());
-        logger_.error() << appName_ << ": " << message;
-        reply = call.createErrorReply({errName, message});
-        reply.send();
-      };
-
-      lock_guard<mutex> lock(mu_);
-      if (!isKeyExists(key)) {
-        handleError("unknown key '" + key + "', discarded");
-        return;
-      }
-
-      if (!isTypeMatches(key, value)) {
-        auto errString = "invalid type of key '" + key + "', expected '" +
-                         dict_[key].peekValueType() + "'";
-        handleError(errString);
-        return;
-      }
-
-      dict_[key] = value;
-
-      if (!writeConfigSafely(handleError))
-        return;
-
-      if (!emitConfigChangedSignal(key, handleError))
-        return;
-
-      logger_.info() << appName_ << ": Key '" << key << "' was set to "
-                     << generic::stringValue(value);
-      reply << "Key '" + key + "' was set to " + generic::stringValue(value);
-      reply.send();
+    thread([this, call = std::move(call)]() {
+      setConfigHandler(std::move(call));
     }).detach();
   };
 }
 
-bool AppInstance::isKeyExists(const string& key) const {
-  return dict_.find(key) != dict_.end();
-}
+void AppInstance::setConfigHandler(sdbus::MethodCall call) {
+  generic::errorHandler([&]() mutable {
+    string key;
+    sdbus::Variant value;
+    call >> key >> value;
 
-bool AppInstance::isTypeMatches(const string& key,
-                                const sdbus::Variant& value) const {
-  return strcmp(dict_.at(key).peekValueType(), value.peekValueType()) == 0;
-}
+    auto handleError = [&](const string& message) {
+      const auto errName =
+        sdbus::Error::Name(cp_->interfaceName + "." + call.getMemberName());
+      logger_.error() << appName_ << ": " << message;
+      auto reply = call.createErrorReply({errName, message});
+      reply.send();
+    };
 
-bool AppInstance::writeConfigSafely(ErrFunc handleError) {
-  try {
+    lock_guard<mutex> lock(mu_);
+    if (dict_.find(key) == dict_.end()) {  // Проверяем наличие ключа `key`
+      string message = "unknown key '" + key + "', discarded";
+      handleError(message);
+      return;
+    }
+
+    if (!isTypeMatches(key, value)) {
+      string message = "invalid type of key '" + key + "', expected '" +
+                       dict_[key].peekValueType() + "'";
+      handleError(message);
+      return;
+    }
+
+    dict_[key] = value;
     writeConfig();
-    return true;
-  } catch (const fs::filesystem_error& e) {
-    handleError("filesystem error: " + string(e.what()));
-  } catch (const Json::Exception& e) {
-    handleError("json error: " + string(e.what()));
-  } catch (const std::exception& e) {
-    handleError("unknown error: " + string(e.what()));
-  }
-  return false;
-}
 
-bool AppInstance::emitConfigChangedSignal(const string& key,
-                                          ErrFunc handleError) {
-  try {
+    // Излучаем сигнал об изменении конфигурации для соответствующего приложения
     auto signal = object_->createSignal(cp_->interfaceName, cp_->signalName);
     signal << key << dict_[key];
     object_->emitSignal(signal);
-    return true;
-  } catch (const sdbus::Error& e) {
-    handleError("sdbus error: " + string(e.what()));
-  } catch (const std::exception& e) {
-    handleError("unknown signal error: " + string(e.what()));
-  }
-  return false;
+
+    stringstream ss;
+    ss << appName_ << ": Key '" << key << "' was set to "
+       << generic::stringValue(value);
+    replyAnswer(call, ss.str());
+  });
+}
+
+const bool AppInstance::isTypeMatches(const string& key,
+                                      const sdbus::Variant& value) const {
+  return strcmp(dict_.at(key).peekValueType(), value.peekValueType()) == 0;
+}
+
+void AppInstance::replyAnswer(sdbus::MethodCall& call, const string& message) {
+  auto reply = call.createReply();
+  reply << message;
+  reply.send();
+  logger_.info() << message;
 }

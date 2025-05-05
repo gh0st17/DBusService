@@ -25,13 +25,13 @@ sdbus::signal_handler ConfManagerApplication::signalCallback() {
                      << "' with value " << generic::stringValue(value);
 
       const lock_guard<mutex> lock(mu_);
-      if (dict_.find(key) == dict_.end()) {
+      if (dict_.find(key) == dict_.end()) {  // Отбрасываем неизвестные ключи
         logger_.error() << "unknown key '" << key << "', discarded";
         return;
       }
 
       dict_[key] = value;
-      cv_->notify_all();
+      cv_->notify_all();  // Уведомляем, что ключ изменился
     }).detach();
   };
 }
@@ -64,7 +64,8 @@ const bool ConfManagerApplication::waitTimeout(unique_lock<mutex>& lock) const {
   oldTimeout = timeout;
 
   return cv_->wait_for(lock, chrono::seconds(timeout), [&] {
-    updateTimeout();
+    updateTimeout();  // В случае прерывания проверяем условие
+                      // обновление таймаута или завершения программы
     return oldTimeout != timeout || generic::stop.load();
   });
 }
@@ -72,12 +73,14 @@ const bool ConfManagerApplication::waitTimeout(unique_lock<mutex>& lock) const {
 void ConfManagerApplication::printTimeoutPhrase() {
   const lock_guard<mutex> lock(mu_);
 
-  if (dict_.find("TimeoutPhrase") == dict_.end()) {
+  // Перед печатью проверяем:
+  if (dict_.find("TimeoutPhrase") == dict_.end()) {  // Наличие ключа
     logger_.info() << appName_ << ": TimeoutPhrase: <key unset>";
-  } else if (dict_["TimeoutPhrase"].containsValueOfType<string>()) {
+  } else if (dict_["TimeoutPhrase"]
+               .containsValueOfType<string>()) {  // Тип ключа
     string value = dict_["TimeoutPhrase"].get<string>();
     logger_.info() << appName_ << ": TimeoutPhrase: '" << value << "'";
-  } else {
+  } else {  // Если ключ найден, но тип не строка
     logger_.warning() << appName_ << ": TimeoutPhrase is not string type";
   }
 }

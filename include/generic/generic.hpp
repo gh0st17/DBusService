@@ -5,6 +5,7 @@
 #include <csignal>
 #include <filesystem>
 #include <fstream>
+#include <functional>
 #include <map>
 
 #include "sdbus-c++/sdbus-c++.h"
@@ -32,6 +33,13 @@ const string stringValue(const sdbus::Variant& value);
 /// @param appName Имя приложения для отображения
 void printConfig(const map<string, sdbus::Variant>& dict,
                  const string& appName);
+
+/// @brief Псевдоним для функции внутри которой ожидается ошибка
+using Func = function<void()>;
+
+/// @brief Функция обработки сообщения об ошибке
+/// @param pred Предикат функции внутри которой ожидается ошибка
+const bool errorHandler(Func pred);
 
 /// @brief Флаг остановки программы
 extern atomic<bool> stop;
